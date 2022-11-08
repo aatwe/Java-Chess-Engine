@@ -1,4 +1,6 @@
-JChess Project
+Java Chess Project
+What objective: Define a class  representing chess tile takes tileCoordinate as parameter
+
 
 A) TILE CLASS
 
