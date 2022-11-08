@@ -1,0 +1,125 @@
+JChess Project
+
+A) TILE CLASS
+
+a) Create  Tile Class		//declare abstract
+
+	how many tiles in chessboard? 64		//2D Array 8x8
+	What we creating? abstraction for single chess tile
+	What chess tiles no.d? 0 - 63
+	
+ 		How to represent tile?
+		a) Create One class called tile represents everything
+		b) Create abstract tile class //define polymorphic behaviour		//We use this 	
+			2 subclasses
+				b.1) empty tile
+				b.2) occupied tile
+
+
+
+b) Create constructors		//function? will assign tileCoordinate to instance of a tile whenever creating instance of a tile
+								//what tileCoordinate? whatever we pass into
+
+	Tile(int tileCoordinate) {
+		this.tileCoordinate = tileCoordinate;
+	}
+
+
+
+c) What methods we need?
+
+	c.1) isTileOccupied();		//Checks if a given tile is occupied or not		//method declared abstract, why? define not in this class but subclass
+
+	c.2) getPiece()l				//Uses Piece class(define later), Gets the piece of a given tile
+							if occupied -> returns some piece
+							if empty    -> returns null
+
+	
+
+d) 	Subclasses
+		d.1) empty tile		//note extend from tile //we will override		//no piece define here
+					d.1.1)  constructor takes coordinate
+							calls super(coordinate);
+					d.1.2) Override isTileOccupied
+					d.1.3) Override getPiece : return null , since nothing on the empty tile
+
+		d.2) occupied tile										//piece defined here
+					d.2.1) How to define piece? Piece pieceOnTile
+					d.2.2) OccupiedTile constructor //takes coordinate and piece	
+							calls super(tileCoordinate)				//establishes tile coordinate
+							this instance.pieceontile = piece passed in constructor
+					d.2.3) Override  isTileOccupied()
+					d.2.4) Override getPiece()
+							reeturns thisinstance.definedpieceOnTile
+	
+B) PIECE CLASS
+
+++++++++++++++++++++++++++++++++++++++
+Code:
+
+
+public abstract class Tile {
+
+
+	int tileCoordinate;
+
+	Tile(int tileCoordinate) {
+		this.tileCoordinate = tileCoordinate;
+	}
+
+
+	public abstract boolean isTileOccupied();
+
+	public abstract Piece getPiece();
+
+	public static final class EmptyTile extend Tile{
+		
+		EmptyTile(int coordinate)
+			super(coordinate);
+	  	}
+
+		@Override
+		public boolean isTileOccupied() {
+			return false;
+		}
+		@Override
+		public Piece getPiece() {
+			return null;
+		}
+
+	}
+	public static final class OccupiedTile extends Tile{
+		
+		Piece pieceOnTile;
+
+		OccupiedTile(int tileCoordinate, Piece pieceOnTile) {
+			super(tileCoordinate);
+			this.pieceOnTile = pieceOnTile
+		}
+
+		EmptyTile(int coordinate)
+			super(coordinate);
+	  	}
+
+		@Override
+		public boolean isTileOccupied() {
+			return true;
+		}
+		@Override
+		public Piece getPiece() {
+			return this.pieceOnTile;
+		}
+
+	}
+
+
+
+}
+
+
+public class Piece {
+
+
+
+
+}

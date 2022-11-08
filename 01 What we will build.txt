@@ -1,0 +1,5 @@
+Chess game:
+
+a) AI
+b) GUI
+c) Game database
