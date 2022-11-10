@@ -1,0 +1,186 @@
+1) What done?
+		Tile Class
+  
+
+   What now?
+		Piece Class	//abstract  //why abstract?
+
+		What will this class allow?
+		create different pieces:
+		//all pieces will inherit from this
+
+
+
+2) WHat every piece has? piece Position , i.e tileCoordinate	 
+				   alliance (color)	//declare as enum 
+
+
+3) Create constructor for Piece
+
+
+4) Why create enum for Alliance?
+	useful for pieces
+	useful for players
+
+	com.chess.engine -> New -> Java Class -> Enum
+		//can import protected final Alliance pieceAlliance; now
+
+5) What is the most important method in Piece class?
+	a) how to calculate legal moves? calculateLegalMoves()
+			//will be abstract method, why?
+			input arg: board of class Board
+
+	b) public abstract List<Move> calculateLegalMoves(final Board board);
+
+	c) How will piece return moves? in a collection / set / list
+							   /unspecified	/not ordered / list
+		//we choose list
+
+	d) How to return list of legal moves? 
+
+
+6) Create new class Move() in board package
+	Note: we have 2 packages: board, pieces
+
+
+7) Create new class board
+	//Now we can import public abstract List<Move> calculateLegalMoves(final Board board);
+
+
+What objective achieved?
+
+create class Piece
+, allother pieces will override abstract method public abstract List<Move> calculateLegalMoves(final Board board);
+kinght legal move differnet, bishop legal move different etc
+
+How will they override this method from piece class? extend Piece and then override
+
+----------------------------------------------------------------------------------------------------------------------------
+Code1 :
+
+
+public class Piece {
+
+	protected final int  piecePostion;
+	protected final Alliance pieceAlliance;
+
+	Piece(final int PiecePosition, final, Alliance pieceAlliance) {
+		this.pieceAlliance = pieceAlliance;
+		this.piecePosition = piecePosition;
+	}
+
+	public abstract List<Move> calculateLegalMoves(final Board board);
+}	
+
+
+Code2 :
+public enum Alliance {
+
+
+}
+
+
+Code3 :
+
+public class Move {
+	
+
+}
+
+
+Code4 :
+
+public class Board {
+
+}
+
+
+
+Code5 :
+
+package com.chess.engine.pieces.Piece;
+
+
+public abstract class Tile {
+
+
+	protected final int tileCoordinate;
+	private static final Map<Integer, EmptyTile> EMPTY_TILES_CACHE = createAllPossibleEmptyTiles();
+
+	private static Map<Integer, EmptyTile> createAllPossibleEmptyTiles() {
+		final Map<Integer, EmptyTile> emptyTileMap = new HashMap<>();
+
+		for(int i=0; i< 64; i++){
+			emptyTileMap.put(i, new EmptyTile(i));
+		}
+		return ImmutableMap.copyOf(EmptyTileMap);
+	}
+
+	public static Tile createTile(final int tileCoordinate, final Piece piece) {
+			return piece != null ? new OccupiedTile(tileCoordinate, piece) :  EMPTY_TILES_CACHE.get(tileCoordinate);
+		}					?	//OccupiedTile				  :	//cached Empty Tile
+
+
+
+	private Tile(int tileCoordinate) {
+		this.tileCoordinate = tileCoordinate;
+	}
+
+
+	public abstract boolean isTileOccupied();
+
+	public abstract Piece getPiece();
+
+	public static final class EmptyTile extend Tile{
+		
+		EmptyTile(final int coordinate)
+			super(coordinate);
+	  	}
+
+		@Override
+		public boolean isTileOccupied() {
+			return false;
+		}
+		@Override
+		public Piece getPiece() {
+			return null;
+		}
+
+	}
+	public static final class OccupiedTile extends Tile{
+		
+		private final Piece pieceOnTile;
+
+		private OccupiedTile(int tileCoordinate, Piece pieceOnTile) {
+			super(tileCoordinate);
+			this.pieceOnTile = pieceOnTile
+		}
+
+		EmptyTile(int coordinate)
+			super(coordinate);
+	  	}
+
+		@Override
+		public boolean isTileOccupied() {
+			return true;
+		}
+		@Override
+		public Piece getPiece() {
+			return this.pieceOnTile;
+		}
+
+	}
+
+
+
+}
+
+Code 6:
+
+package com.chess.engine.pieces
+public class Piece {
+
+
+
+
+}
