@@ -1,0 +1,191 @@
+What done till now? tile class 
+				-> 2 sub classes
+				a) EmptyTile
+
+				b) Occupied Tile 
+
+
+
+1) Why tile class abstract? cant instantiate i.e cannot new Tile
+
+	Can we instantiate subclasses? Yes
+
+
+2) Why EmptyTile and OccupiedTile inside Class Tile? Why not separately?
+
+	if declared separate: also no need to declare static
+
+
+Because
+	we dont want them as innerclass with inherited state from Tile
+	we want them on their own
+
+
+
+3) How to organize our code further? put code in logical packages?
+
+	introduce: com.chess.engine.board
+			com.chess.engine.pieces		//select move to package if error during packaging //ide does heavy lifting
+
+	..if still any class errors -> ctrl + click -> import class 
+
+
+4) Immutability notion: make tile class Immutable
+How to make class object immutable?
+	find what mutates in our class object
+	a) in class Tile: tileCoordinate	//we havent given setter method on tileCoordinate
+
+	Solution: protected final int tileCoordinate 		//protected : can only access by subclasses , final:  can be set only once
+
+
+
+	b) in subclass EmptyTile -> arguments to EmptyTile constructor as final EmptyTile(final int coordinate)
+
+	c) Why private final Piece pieceOnTile; ? No way to reference this variable outside wo calling getter getPiece()
+
+
+5) Constants and caching? 
+	 create all empty tiles upfront
+	 when want to retrieve  --> look up in cache
+
+	How to achieve this caching?
+
+	a) declare new member field in class Tile
+	
+		private static final Map<Integer, EmptyTile> EMPTY_TILES = createAllPossibleEmptyTiles();	
+
+			//import java.util.Map
+	b) create method: createAllPossibleEmptyTiles()
+		What this method will do?
+
+		final Map<Integer, EmptyTile> emptyTileMap = new HashMap<>();
+
+		for(int i=0; i< 64; i++){
+			emptyTileMap.put(i, new EmptyTile(i));
+		}
+		return ImmutableMap.copyOf(EmptyTileMap);		//new library: guava library(Google) --> ImmutableMap
+											//What this does? an immutable Map   //instead of returning just EmptyTileMap -> nobody can change it
+											//instead of return emptyTileMap;
+							//How to instal Guava? wrench -> Libraries -> Java
+								//how to easily search for file if present on your pc? find . -name "*guava*"
+
+							cp  "Path found" ~/		//copies to your home directory
+
+							-> Select this in your libraries -> Ok
+							//now you will be able to  use ImmutableMap.copyOf(EmptyTileMap); 
+
+
+		//What we did in till now? we created every possible Empty Tile that can exist out front
+		//WE DONT NEED TO CONSTRUCT THEM AGAIN
+			How will we access first chess tile then, if you have created all?	emptyTileMap.get(1, EmptyTile(0));
+
+
+		//What if we want last tile on chess board?							emptyTileMap.get(63, EmptyTile(63));
+
+
+	c) Make all constructors private
+			//private Tile(int tileCoordinate) {
+
+
+	d) Only way any once can create a  new tile? -> Have to use our method 
+		public static Tile createTile(final int tileCoordinate, final Piece piece) {
+			return piece != null ? new OccupiedTile(tileCoordinate, piece) :  EMPTY_TILES.get(tileCoordinate);
+		}
+
+		//This is the only method anyone will be allowed to use on class to create a tile
+
+
+		Q) Why shouldnt we cache all occupied tiles?
+
+
+Objective Achieved: Tile class made Immutable
+___________________________________________________________________________
+
+Code1 :
+
+package com.chess.engine.pieces.Piece;
+
+
+public abstract class Tile {
+
+
+	protected final int tileCoordinate;
+	private static final Map<Integer, EmptyTile> EMPTY_TILES = createAllPossibleEmptyTiles();
+
+	private static Map<Integer, EmptyTile> createAllPossibleEmptyTiles() {
+		final Map<Integer, EmptyTile> emptyTileMap = new HashMap<>();
+
+		for(int i=0; i< 64; i++){
+			emptyTileMap.put(i, new EmptyTile(i));
+		}
+		return ImmutableMap.copyOf(EmptyTileMap);
+	}
+
+	public static Tile createTile(final int tileCoordinate, final Piece piece) {
+			return piece != null ? new OccupiedTile(tileCoordinate, piece) :  EMPTY_TILES.get(tileCoordinate);
+		}					?	//OccupiedTile				  :	//cached Empty Tile
+
+
+
+	private Tile(int tileCoordinate) {
+		this.tileCoordinate = tileCoordinate;
+	}
+
+
+	public abstract boolean isTileOccupied();
+
+	public abstract Piece getPiece();
+
+	public static final class EmptyTile extend Tile{
+		
+		EmptyTile(final int coordinate)
+			super(coordinate);
+	  	}
+
+		@Override
+		public boolean isTileOccupied() {
+			return false;
+		}
+		@Override
+		public Piece getPiece() {
+			return null;
+		}
+
+	}
+	public static final class OccupiedTile extends Tile{
+		
+		private final Piece pieceOnTile;
+
+		OccupiedTile(int tileCoordinate, Piece pieceOnTile) {
+			super(tileCoordinate);
+			this.pieceOnTile = pieceOnTile
+		}
+
+		EmptyTile(int coordinate)
+			super(coordinate);
+	  	}
+
+		@Override
+		public boolean isTileOccupied() {
+			return true;
+		}
+		@Override
+		public Piece getPiece() {
+			return this.pieceOnTile;
+		}
+
+	}
+
+
+
+}
+
+Code 2:
+
+package com.chess.engine.pieces
+public class Piece {
+
+
+
+
+}
