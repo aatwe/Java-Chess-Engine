@@ -1,0 +1,300 @@
+1) What we learnt?
+	piece class
+
+	abstract method calculateLegalMoves(final Board board)
+
+
+
+2) Create Alliance enum
+	WHITE
+	BLACK
+
+//We only want 2 constant instances, behaviour later
+
+Why enum? before java5 -> How defined constants?
+	public static final int SEASON_WINTER = 0;
+	public static final int SEASON_SUMMER = 1;
+	public static final int SEASON_SPRING = 2;
+	public static final int SEASON_FALL   = 3;
+
+
+//What issue with this? not type safe	
+	//can pass any other int where for ex SEASON_WINTER is required
+
+Solution: enum
+
++ Also can define behaviour in enum
+
+
+3) a) Create first Piece Knight
+	//create class Knight extends Piece 
+
+   b) Create constructor for Knight	//input: piecePosition pieceAlliance of type Alliance
+   c) 	Override calculateLegalMoves	
+
+  
+4) How to calculate legal moves for a knight?
+	wiki:
+
+		knight on d4 -> legal moves: d5,c6,e6,f5,f3,e2,c2,b3
+
+how is chess board mapped?  0,  1 ,2, 3, 4, 5, 6, 7
+					 8,  9,10,11,12,13,14,15
+					16, 17,18,19,20,21,22,23
+					24, 25,26,27,28,29,30,31
+					32, 33,34,35,36,37,38,39
+					40, 41,42,43,44,45,46,47
+					48.....55
+					56.....64	
+					.
+					
+
+What is candidate legal move if knight at general place 35?
+
+		35 - 6 = 29 = candidate legal move  or out of bound
+	
+
+	from current location : 8 candidates (ideally)
+
+	
+	a.0) Create List of legalMoves
+
+	a) final destination coord for a piece based on above knight logic?
+
+	loop over list value
+	
+		current piece position + currentCandidate List value
+	
+	= all final 8 destination coordinates
+
+	b) check if coord is valid
+
+	What is validity check for knight? 
+		dont go out of bounds
+		how to get tile from coordinate? getTile()
+
+		final Tile candidateDestinationTile = board.getTile(candidateDestinationCoordinate);
+
+	c) 
+	What after getting the tile?
+	c.1) check if that tile is occupied or not
+		if tile is not occupied -> add the move() to legal moves List
+					//used in move class
+		else if is occupied -> get piece at that location
+			How to get the piece at that location?
+				candidateDestinationTile.getPiece();
+					store this piece where? Piece pieceAtDestination
+	
+					//We know every Piece will have pieceDestination and Alliance
+					//find pieceDestination and Alliance for that piece
+
+					c.2) check if pieceAlliance of (Knight) this.pieceAlliance != pieceAlliance (of pieceAtDestination)
+						-> if not means -> enemy piece	
+		
+					c.3) What if enemy piece? add this move in legalMoves
+
+	d) Create getPieceAlliance() of type Alliance in Piece.java
+
+
+	e) in end -> return ImmutableList.copyOf(legalMoves);	//return all list of legalMoves
+	-----------What we did---------
+  for every candidate legal moves:	
+	Applied offset to a member field //candidateDestinationCoordinate 
+
+
+5) Create method getTile() in class Board we need in code		//returns null for now
+
+	  public Tile getTile(final int tileCoordinate) {
+		return null;
+	}
+
+
+
+--------------------------------------------------------------------------------
+What we did till now?
+
+a) we identify list of candidate destinations for knight
+	//our set contains the offsets wr to current position
+
+b) consider offsets in for loop
+	for each offset + current position = candidate destination coordinate
+
+	check if  candidate destination coordinate is valid tile and is not occupied
+		if so -> add a non attacking legal move
+
+	else if tile is occupied
+		get Alliance of the piece	at that tile
+			check if alliance != current position knight's alliance
+				-> add attacking move to legal moves		//right now just adding new Move() 
+
+--------------------------------------------------------------------------------
+Code 1 :
+
+public enum Alliance {
+	WHITE,
+	BLACK
+
+}
+
+
+Code 2 :
+
+public class Knight extends Piece {
+
+	private final static int[] CANDIDATE_MOVE_COORDINATES = {-17, -15, -10, -6, 6, 10, 15, 17};
+
+	Knight(final int piecePostiion, final Alliance pieceAlliance ){
+		super(piecePosition, pieceAlliance);
+	}
+
+	@Override
+	public List<Move> calculateLegalMoves(Board board) {
+		
+		int candidateDestinationCoordinate;
+		final List<Move> legalMoves = new ArrayList<>();
+	
+		for(final int currentCandidate : CANDIDATE_MOVE_COORDINATES) {
+			candidateDestinationCoordinate = this.piecePosition + currentCandidate;
+		
+		if(true /*isValidTileCoordinate*/) {
+		  final Tile candidateDestinationTile = board.getTile(candidateDestinationCoordinate);
+		   if(!candidateDestinationTile.isTileOCcupied()) {
+				legalMoves.add(new Move());
+			} else {
+			final Piece pieceAtDestination = candidateDestinationTile.getPiece();
+			final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
+
+			if(this.pieceAlliance != pieceAlliance) {
+				legalMoves.add(new Move());
+			  }
+		    }
+		  }
+		}
+
+		return ImmutableList.copyOf(legalMoves);
+	}
+}
+
+
+Code 3:
+
+public class Piece {
+
+	protected final int  piecePostion;
+	protected final Alliance pieceAlliance;
+
+	Piece(final int PiecePosition, final, Alliance pieceAlliance) {
+		this.pieceAlliance = pieceAlliance;
+		this.piecePosition = piecePosition;
+	}
+
+	public Alliance getPieceAlliance() {
+		return this.pieceAlliance;
+	}
+
+	public abstract List<Move> calculateLegalMoves(final Board board);
+}	
+
+
+
+
+Code2 :
+public enum Alliance {
+
+
+}
+
+
+Code3 :
+
+public class Move {
+	
+
+}
+
+
+Code4 :
+
+public class Board {
+  public Tile getTile(final int tileCoordinate) {
+		return null;
+	}
+}
+
+Code5 :
+package com.chess.engine.pieces.Piece;
+
+
+public abstract class Tile {
+
+
+	protected final int tileCoordinate;
+	private static final Map<Integer, EmptyTile> EMPTY_TILES_CACHE = createAllPossibleEmptyTiles();
+
+	private static Map<Integer, EmptyTile> createAllPossibleEmptyTiles() {
+		final Map<Integer, EmptyTile> emptyTileMap = new HashMap<>();
+
+		for(int i=0; i< 64; i++){
+			emptyTileMap.put(i, new EmptyTile(i));
+		}
+		return ImmutableMap.copyOf(EmptyTileMap);
+	}
+
+	public static Tile createTile(final int tileCoordinate, final Piece piece) {
+			return piece != null ? new OccupiedTile(tileCoordinate, piece) :  EMPTY_TILES_CACHE.get(tileCoordinate);
+		}					?	//OccupiedTile				  :	//cached Empty Tile
+
+
+
+	private Tile(int tileCoordinate) {
+		this.tileCoordinate = tileCoordinate;
+	}
+
+
+	public abstract boolean isTileOccupied();
+
+	public abstract Piece getPiece();
+
+	public static final class EmptyTile extend Tile{
+		
+		EmptyTile(final int coordinate)
+			super(coordinate);
+	  	}
+
+		@Override
+		public boolean isTileOccupied() {
+			return false;
+		}
+		@Override
+		public Piece getPiece() {
+			return null;
+		}
+
+	}
+	public static final class OccupiedTile extends Tile{
+		
+		private final Piece pieceOnTile;
+
+		private OccupiedTile(int tileCoordinate, Piece pieceOnTile) {
+			super(tileCoordinate);
+			this.pieceOnTile = pieceOnTile
+		}
+
+		EmptyTile(int coordinate)
+			super(coordinate);
+	  	}
+
+		@Override
+		public boolean isTileOccupied() {
+			return true;
+		}
+		@Override
+		public Piece getPiece() {
+			return this.pieceOnTile;
+		}
+
+	}
+
+
+
+}

@@ -1,0 +1,221 @@
+a) What we did? calculateLegalMoves()
+
+b) What algo does till now?
+	a) loop over candidate offsets
+	b) apply offsets 1 by 1 to current position, calculate destinationCoordinate
+	c) check if it is a valid tile coordinate
+	d) if valid -> get tile of that coordinate
+	e) if tile is not occupied, add move in legal moves
+
+	f) else if tile is occupied,
+		find which piece at destination
+		find alliance of that piece
+		match alliance with current piece we checking
+		if not same alliance
+			->  attacking move -> add to legalMoves
+
+
+c) What tasks to do?
+
+	c.a) 
+
+	  a.1) 	create isvalidTileCoordinate()		//What input arg?candidateDestinationCoordinate	  //is it applicable only to knight? NO, to all piece types
+
+			How to chek if isvalidTileCooridnate?
+			just check if candidateDestinationCoordinate lies inside the bounds chess board
+
+
+	  a.2) 	Since method applicable to all pieces, refactor -> move		//before moving make static, why static?
+												//move where? from package pieces to package board -> class Board Utils	//why? method is not piece specific
+		
+	  a.3) 	What else BoardUtils will contains? useful constants and static methods	
+					constructor
+
+	  1.4) 	What exceptions to knight calculations?
+			for ex knight on a4 , apply -10 offset 
+
+				a4 -10 -> does not satisfy
+
+				Solution? discover remaining all edge cases -> capture them in methods
+
+	
+	  a.5) 	capture edge cases in 	//what arg? currentPosition and candidateOffset
+	
+			private static boolean isFirstColumnExclusion(final, int currentPosition, final int candidatePosition)
+
+			//what to do in this?
+			
+			a.5.1) what to capture? all tile coordinate (col,row)
+					from where to capture coordinates? BoardUtils //assume
+		 Objective: 	-  >Check: if currentPosition falls in FIRST_COLUMN[] of chessboard AND candidateOffSet is any of the given values
+					
+
+		Q)  Create array of boolean FIRST_COLUMN in board utils
+
+		What return	BoardUtils.FIRST_COLUMN[currentPosition] && ((candidateOffSet == -17) || (candidateOffSet == -10) || candidateOffSet == 6 || candidateOffSet = 15); 
+				does?
+
+		   we will use an array of boolean FIRST_COLUMN in board utils
+			public static final boolean[] FIRST_COLUMN = null;
+
+			//basically: array of booleans with all values null	//size 64
+
+			//only first column values will be true, all other values false
+
+		 Objective: 	-  >Check: if currentPosition falls in FIRST_COLUMN[] of chessboard AND candidateOffSet is any of the given values
+																					//rule breaks
+
+			-> skip
+	
+
+
+		ConclusioN: 	if(true /*isValidTileCoordinate*/)  -> becomes -> if (ifFirstColumnExclusion(this.piecePosition, currentCandidate)) {continue;}
+	...
+	Similarly add
+	Second column exclusion
+	eighth column exclusion
+
+
+	ConclusiON:	//these are 4 exclusion to our rules	//accordingly add constants
+			private static boolean isFirstColumnExclusion(final int currentPosition, final int candidatePosition) {
+		return	BoardUtils.FIRST_COLUMN[currentPosition] && ((candidateOffSet == -17) || (candidateOffSet == -10) || candidateOffSet == 6 || candidateOffSet = 15); 
+		}
+
+	private static boolean isSecondColumnExclusion(final int currentPosition, final int candidateOffset) {
+		return BoardUtils.SECOND_COLUMN[currentPosition] && ((candidateOffSet == -10) || (candidateOffSet == 6); 
+		}
+
+	private static boolean isSeventhColumnExclusion(final int currentPosition, final int candidateOffset) {
+		return BoardUtils.SEVENTH_COLUMN[currentPosition] && ((candidateOffSet == -6) || (candidateOffSet == 10); 
+		} 
+	private static boolean isEighthColumnExclusion(final int currentPosition, final int candidateOffset) {
+		return BoardUtils.EIGHTH_COLUMN[currentPosition] && ((candidateOffSet == -15) || (candidateOffSet == -6); || (candidateOffSet == 10) || (candidateOffSet == 17));
+		} 
+
+	}
+
+
+	//also add exclusion checks in if
+	if (isFirstColumnExclusion(this.piecePosition, currentCandidateOffset) || 
+			isSecondColumnExclusion((this.piecePosition, currentCandidateOffSet)) || 
+				isEighthColumnExclusion(this.piecePosition, currentCandidateOffSet)) {
+			
+				continue;
+
+			}
+
+
+
+	c.b) move()
+	
+
+	
+	
+
+
+
+
+
+------------------------------------------------------------------------------------------------
+Code:
+
+
+public class Knight extends Piece {
+
+	private final static int[] CANDIDATE_MOVE_COORDINATES = {-17, -15, -10, -6, 6, 10, 15, 17};
+
+	Knight(final int piecePostiion, final Alliance pieceAlliance ){
+		super(piecePosition, pieceAlliance);
+	}
+
+	@Override
+	public List<Move> calculateLegalMoves(Board board) {
+		
+		int candidateDestinationCoordinate;
+		final List<Move> legalMoves = new ArrayList<>();
+	
+		for(final int currentCandidate : CANDIDATE_MOVE_COORDINATES) {
+			final int candidateDestinationCoordinate = this.piecePosition + currentCandidate;
+		
+		if(Board.Utils.isValidfileCoordinate(candidateDestinationCoordinate)) {
+
+
+		if (isFirstColumnExclusion(this.piecePosition, currentCandidateOffset) || 
+			isSecondColumnExclusion((this.piecePosition, currentCandidateOffSet)) || 
+				isEighthColumnExclusion(this.piecePosition, currentCandidateOffSet)) {
+			
+				continue;
+
+			}
+
+		  final Tile candidateDestinationTile = board.getTile(candidateDestinationCoordinate);
+		   if(!candidateDestinationTile.isTileOCcupied()) {
+				legalMoves.add(new Move());
+			} else {
+			final Piece pieceAtDestination = candidateDestinationTile.getPiece();
+			final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
+
+			if(this.pieceAlliance != pieceAlliance) {
+				legalMoves.add(new Move());
+			  }
+		    }
+		  }
+		}
+
+		return ImmutableList.copyOf(legalMoves);
+
+	private static boolean isFirstColumnExclusion(final int currentPosition, final int candidatePosition) {
+		return	BoardUtils.FIRST_COLUMN[currentPosition] && ((candidateOffSet == -17) || (candidateOffSet == -10) || candidateOffSet == 6 || candidateOffSet = 15); 
+		}
+
+	private static boolean isSecondColumnExclusion(final int currentPosition, final int candidateOffset) {
+		return BoardUtils.SECOND_COLUMN[currentPosition] && ((candidateOffSet == -10) || (candidateOffSet == 6); 
+		}
+
+	private static boolean isSeventhColumnExclusion(final int currentPosition, final int candidateOffset) {
+		return BoardUtils.SEVENTH_COLUMN[currentPosition] && ((candidateOffSet == -6) || (candidateOffSet == 10); 
+		} 
+	private static boolean isEighthColumnExclusion(final int currentPosition, final int candidateOffset) {
+		return BoardUtils.EIGHTH_COLUMN[currentPosition] && ((candidateOffSet == -15) || (candidateOffSet == -6); || (candidateOffSet == 10) || (candidateOffSet == 17));
+		} 
+
+	}
+}
+
+
+Code 2:
+BoardUtils.java
+
+public class BoardUtils {
+	public static final boolean[] FIRST_COLUMN = null;
+	public static final boolean[] SECOND_COLUMN = null;
+	public static final boolean[] SEVENTH_COLUMN = null;	
+	public static final boolean[] EIGHTH_COLUMN = null;
+
+	private BoardUtils() {
+		throw new RuntimeException("You cannot instantiate me");
+	}
+
+
+	public static boolean isValidTileCoordinate(int coordinate) {
+		return coordinate >=0 && coordinate < 64;
+	}
+
+	
+}
+
+
+Code 3:
+public class Piece {
+
+	protected final int  piecePostion;
+	protected final Alliance pieceAlliance;
+
+	Piece(final int PiecePosition, final, Alliance pieceAlliance) {
+		this.pieceAlliance = pieceAlliance;
+		this.piecePosition = piecePosition;
+	}
+
+	public abstract List<Move> calculateLegalMoves(final Board board);	//this could have been unspecified => refactor -> change signature // List<Move> -> Collection<Move>
+}														//a set cant have duplicates + unordered
+														//list is ordered, can get values at index
