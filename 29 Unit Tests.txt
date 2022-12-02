@@ -1,0 +1,57 @@
+Objective: write test cases for game
+
+develop test cases from start of project ideally
+
+What is junit : framework to write test cases, can run test cases within ide before commit 
+
+
+a) Board class -> navigate -> Test (Create test case)
+
+//Use JUnit4
+
+b) import static org.junit.Assert.*; 	//add Junit library to classPath
+
+c) This will be our test case
+c.1) create board
+c.2) white player has 20 legal moves, black player has 20 legal moves
+c.3) white player not in check,checkmater or castled + black player
+c.4) 
+
+//why testing important? test correctness + allow to make big changes to program wo worrying about regressing on quality side 
+//check if all test cases pass
+
+c.5) run testBoard.java
+
+	IntelliJ knows this is test case, gives green indicator  when all testcases
+	are passing
+for ex try changing assertEqualstboard.CurrentPlayer()).getLegalMoves().size(), 19);
+
+a value
+	Intellij shows red //expected : 20 legal moves
+				     actual: 19 legal moves
+
+
+@Test
+public class TestBoard (
+public void initialBoardl) {
+final Board board - Board.crcatcStandardBoardi)z
+assertEqualstboard.CurrentPlayer()).getLegalMoves().size(), 20):
+assertEqualslboard.currentPlaycri).gct09poncnt().octhgalHovcst).sizc(). 20):
+assertFalsclboard.currentPlaycrl).isln{hcck()):
+assertFalsclboard.currentPlaycrl).isIancchNatc()):
+assertFalsclboard.currcniPlaycrl).isCastlcd()):
+//assertTruclboard.currcniPlaycr().isKingSichastlcCapablcl)):
+//assortTruclboard.currcniPlavcrl).isOuccnSideCastlcCapablct)):
+asscriEqualsiboard.currentPlaycri). board.unitcPlaycr()):
+assortEqualsiboard.currentPlaycrl).gctOppoocnt(). board.blachPlaycr()):
+asscriFalsclboard.currentPlaycrl).octOpponent().is!n(hcck()):
+assortFalsclboard.currentPlaycrl).9ct09ponentl).isinChcchMatc()):
+assertFalsclboard.currcntPlaycr().octOpponentl).isCastled()):
+assortfruclboard.currentPlayorl).9ci0pponcntl).isKingSichastlcCapablcl)):
+assortTruclboard.currentPlayorl).9otOpponcntl).isOuecnSideCastleCapablc()):
+assortEqualstncu StandardaoardEvaluatorl).evaluatolboard, 
+
+)
+
+d) 
+

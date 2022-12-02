@@ -1,0 +1,139 @@
+a) table class is main GUI class
+
+
+a.1) how to place gif of piece on tile?
+In Table.java
+
+	1) create assignTilePieceIco, pass board
+	2) remove all components added to tile panel
+	3) if board's tile's tileid is occupied -> draw the piece
+			//research GUI prgoramming
+	4) reference the images
+	   //How to find path to gif file
+		final BufferedImage image = ImageIO.read(new File(pieceIconPath + ))
+		//add ImageIO in try catch  -> output; image
+	5) add new JLabel to this component
+
+
+	Each file --> reference --> Piece -->  piece named as per convention in ImageIO (for ex get allegiance's tostring,concat with actual piece and.gif)
+		for ex : white bishop	= WB.gif
+			//W from allegiance, B from piece, concat with gif 
+
+
+a.2) created gifs in art directory
+	
+
+private void assignTilePieceIcon(final Board board) {
+	this.removeAll();
+	if(board.getTile(this.tileId).isTileOccupied()) {
+		String pieceOnPath = "";
+	try {		
+		final BufferedImage image = ImageIO.read(new File(pieceIconPath + board.getTile(this.tileId).getPiece().getPieceAlliance().toString().substring(0,1)) +
+			board.getTile(this.tileId).getPiece().toString() + ".gif"));
+		);
+			add(new JLabel(new ImageIcon(image)));
+		
+	}catch (IO Exception e) {
+		e.printStackTrace();
+	}
+
+}
+
+a.3) import art folder
+
+
+a.4) add field
+	private final Board chessBoard;
+	this.chessBoard = Board.createStandardBoard();
+
+a.5) In TilePanel constructor
+
+		assignTilePieceIcon(chessBoard)
+
+a.6) create defaultPieceImagesPath in Table
+		art/pieces/plain/
+		use in ImageIO.read
+
+
+
+RUN:
+
+a) See black and white square with piece gifs printed on them
+
+
+Objective: 
+
+
+a) panel on left
+	shows pieces taken
+b) panel on right
+	shows history moves
+
+c) listen for mouse click events on tiles
+	addd MouseListener for MouseClicked events
+
+		if right mouse click -> cancel prior selection
+					sourceTile = null;
+					destinationTile = null;	
+					humanMovedPiece = null;
+					
+	
+c.1) in Table.java TilePanel class
+
+	add private Tile sourceFile
+	add private Tile destinationTile
+	    private Piece humanMovedPiece
+
+	c.1.1) if user right clicks tile -> cancels piece selection
+	c.2.2) if click on tile -> not empty tile --> assign piece to humanMovedPiece	
+			else undo assignment of source file --> just exit from here
+			
+
+		first click
+
+		second click
+			make the move
+			 if transition is done
+			  update chessBoard	 
+		
+		addmouselistener(new MouseListener()){
+			@Override
+			public void mouseClicked(final MouseEvent e){
+				if(isRightMouseButton(e)) {
+					sourceTile = null;
+					destinationTile = null;	
+					humanMovedPiece = null;
+					
+
+					if(sour	ceTile == null) {
+					//firstClick
+						sourceTile = chessBoard.getTile(tileId);
+						humanMovedPiece - sourceFile.getPiece();
+						if(humanMovedPiece == null) {
+							sourceFile = null;
+						}
+					 } else {
+						destinationTile = chessBoard.getTile(tileId);
+						final Move move = null;
+					}
+				 }	
+
+				} 
+			@Override
+			public void mousePressed(final MouseEvent e){
+
+			}
+			@Override
+			public void mouseReleased(final MouseEvent e){
+
+			}
+			@Override
+			public void mouseEntered(final MouseEvent e){
+
+			}
+			@Override
+			public void mouseExited(final MouseEvent e){
+
+			}
+		}
+	

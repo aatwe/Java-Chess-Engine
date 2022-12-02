@@ -1,0 +1,257 @@
+a) create interface Board Evaluator
+
+	//in MiniMax.java , set constructor to StandardBoardEvaluator
+
+public MiniMax() {	
+
+  this.boardEvaluator = new StandardBoardEvaluator();
+
+
+}
+
+
+b) create final (nobody should extend)StandardBoardEvaluator class in destination package
+
+b.1) create evaluate(), input board and depth , output: score for the board
+
+b.2) subtract score from white FROM  score from black and return as output
+
+		if white advantage -> +ve no.	
+		else -ve
+
+
+b.3) create scorePlayer() , Input: board and player and depth
+					 Output: return pieceValue(player);
+
+	//we will assign values to each pieces and add them
+
+
+b.4) create pieceValue() Input: which player
+				   Output : pieceValuescore for that player
+
+		init pieceValueScore as 0
+		loop over piece from Piece class, get ActivePieces (not killed ones) getPiecevalue
+		add their value to pieceValueScore
+		return pieceValueScore
+	//how getPiece value implemented
+	In Piece.java , we have a wrapper on enums
+	public int getPieceValue() {
+		return this.pieceType.getPieceValue();
+	}
+
+//pass scores in the enums
+	what are these heuristic values
+
+PAWN(100, "P") {
+@Override
+public boolean isKing() {
+return false;
+}
+@Override
+public boolean isRook() {
+return false;
+}
+}
+
+b.5) Add all pieces of white - add all pieces of black
+Note: we can add other qualities: check,checkMate,castled,mobility
+
+What general flow till now?
+
+White/Black --> call min/max(based on white/black) --> min will go thorugh all minimize player moves --> execute them--> call max for each of those move
+
+switch to enemy
+max() -> will do same again
+
+propogate back up with what? min value at that level
+					  max value at that level
+
+this algo works? slowly
+
+
+
+
+
+--------------------------------------------------------------------- 
+public final class StandardBoardEvaluator implements BoardEvaluator {
+@Override
+public int evaluate(final Board board,
+final int depth) {
+return scorePlayer(board, board.whitePlayer(), depth) -
+scorePlayer(board, board.blackPlayer(), depth);
+}
+private int scorePlayer(final Board board,
+final Player player,
+final int depth) {
+
+return piecevalue(player);
+}
+private static int pieceValue(final Player player) {
+
+int pieceValueScore = O;
+
+for(final Piece piece : player.getActivePieces()) {
+
+pieceValueScore += piece.gei£flegcyalufl();
+
+}
+
+return pieceValueScore_
+}
+
+}
+__________________________________________________________________
+public int min(final Board board,
+final int depth) {
+if(depth == 0 /*|| game over*/) {
+return this.boardEvaluator.evaluate(board, depth);
+}
+int lowestSeenValue = Integer.MAX;VALUE;
+for(final Move move : board.currentPlayer().getLegalMoves()) {
+final MoveTransition moveTransition = board.currentPlayer().makeMove(move);
+if(moveTransition.getMoveStatus().isDone()) {
+final int currentValue = max(moveTransition.getTransitionBoard(), depth - 1);
+if(currentValue <= lowestSeenValue) {
+lowestSeenValue = currentValue;
+}
+}
+}
+return lowestSeenValue;
+} I
+public int max(final Board board,
+final int depth) {
+if(depth == 0 /x|| game over$/) {
+return this.boardEvaluator.evaluate(board, depth);
+}
+int highestSeenValue = Integer.MIN_VALUE;
+for(final Move move : board.currentPlayer().getLegalMoves()) {
+final MoveTransition moveTransition = board.currentPlayer().makeMove(move);
+if(moveTransition.getMoveStatus().isDone()) {
+final int currentValue = min(moveTransition.getTransitionBoard(), depth - 1);
+if(currentValue >= highestSeenValue) {
+highestSeenValue = currentValue;
+}
+}
+}
+return highestSeenValue;
+}
+
+
+________________________________________________________________________________
+@Override
+public Move execute(Board board, int depth) {
+final long startTime = System.currentTimeMillis();
+Move bestMove = null;
+int highestSeenValue = Integer.MIN_MALUE;
+int lowestSeenValue = Integer.MAX_MALUE;
+int currentValue;
+System.out.println(board.currentPlayer() + " THINKING with depth = " +depth);
+int numMoves = board.currentPlayer().getLegalMoves().size();
+for(final Move move : board.currentPlayer().getLegalMoves()) {
+I
+final MoveTransition moveTransition = board.currentPlayer().makeMove(move);
+if(moveTransition.getMoveStatus().isDone()) {
+currentValue = board.currentPlayer().getAlliance().iswhite() ?
+min(moveTransition.getTransitionBoard(), depth - 1) :
+max(moveTransition.getTransitionBoard(), depth - 1);
+if( board.currentPlayer().getAlliance().isWhite() && currentValue >= highestSeenValue) {
+highestSeenValue = currentValue;
+bestMove = move;
+} else if(board.currentPlayer().getAlliance().isBlack() && currentValue <= lowestSeenValue) {
+lowestSeenValue = currentValue;
+bestMove = move;
+}
+}
+}
+
+
+
+c) Add Mobility quality to evaluation method
+
+c.1) return pieceValue(player) + mobility(player);	
+
+c.2) will calculate how many legal moves for player for the position
+	create mobility(Player player) {
+
+		return player.getLegalMoves().size();	
+}
+
+
+d) Add check
+//input player and depth
+
+d.1) return pieceValue(player) + mobility(player) + check(Player); 	
+
+d.2) will calculate how many legal moves for player for the position
+if current player's opponent is in check --> return CHECK_BONUS else return 0 
+
+	create check(final Player player) {
+		return player.getOpponent().isInCheck();	
+}
+
+d.3) add private static final int CHECK_BONUS = 50;	 //why 50? if current board has opponent in check
+
+
+e) Add checkMate 
+
+Note: //if we find checkmate at higher depth (sooner)in search routine, give bigger bonus
+ 
+
+f) in StandardBoardEvaluator
+	     CHECK_BONUS = 50;
+	give CHECK_MATE_BONUS = 10000
+		DEPTH_BONUS = 100;
+
+g) in StandardBoardEvaluator
+	     private static final int CASTLE_BONUS = 60;
+
+private static int castled(Player player) {
+	return player.iscastled() ? CASTLE_BONUS : 0; 
+}
+
+.//Now we have added, pieceValue, mobility, checkMate, check, castle
+
+
+h)    
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+public final class StandardBoardEvaluator implements BoardEvaluator {
+private static final int CHECK;BONU$ = 50;
+@Override
+public int evaluate(final Board board,
+final int depth) {
+return scorePlayer(board, board.whitePlayer(), depth) -
+scorePlayer(board, board.blackPlayer(), depth);
+}
+private int scorePlayer(final Board board,
+final Player player,
+final int depth) {
+return piecevalue(player) + mobility(player) + check(player) +
+checkmate(player, depth) + castled(player);
+
+// + Checkmate, check, castled, mobility....
+}
+private int checkmate(Player player, depth) {
+return player.getOpponent().isInCheckMate() ? CHECK_MATE_BONUS * depthBonus(depth) : 0;
+}
+private static int depthBonus(int depth) {
+	return  depth == 0?1 : DEPTH_BONUS*depth
+}
+
+
+private static int check(final Player player) {
+return player.getOpponentl).isInCheck() ? CHECK_BONUS : O;
+}
+private static int mobility(final Player player) {
+return player.getLegalMoves().size();
+}
+private static int pieceValue(final Player player) {
+int pieceValueScore = O;
+for(final Piece piece : player.getActivePieces()) {
+pieceValueScore += piece.getPieceValue();
+}
+return pieceValueScore;
+}
+}
+

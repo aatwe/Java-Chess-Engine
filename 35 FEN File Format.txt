@@ -1,0 +1,177 @@
+a) What is FEN File format?
+describes a particular board position in chess
+
+
+
+FEN initially: 
+										
+rankbnr/pppppppp/ 8/ 8/ 8/8/ PPPPPPPP/ RNBQKBNR w KQkq - O 1
+black					white			   turn legalcastleremain	en pessant pawn	  gameclock/move#
+
+
+
+
+
+b)  add pgn package in chess
+
+
+b.1) create FenUtilities class
+b.2) constructor
+b.3) Create 2 public APIs
+
+	if given fen string -> return board
+	if given board -> get FEN Strings
+
+
+	createGameFromFEN(final String fenString) {
+		return null;
+	} 
+
+	public static String createFENFromGame(final Board board) {
+		return   return calculateBoardText(board) + " " +
+			    calculateCurrentPlayerText(board) + " " +
+			    calculateCastleText(board) + " " +
+			    calculateEnPassantSquare(board) + " " +
+
+	}
+//use substring to return the 1st char, white or black, put to lowercase
+b.3.1) 
+	private static String calculateCurrentPlayerText(final Board board) {
+		return board.currentPlayer().toString().substring(O, 1).toLowerCase()h
+	}
+
+b.3.2) if no castles available in board , put - 
+
+private static String calculateCastleText(final Board board) {
+final StringBuilder builder = new StringBuilder();
+if(board.whitePlayer().isKingSideCastleCapable()) {
+builder.append("K");
+}
+if(board.whitePlayer().isOueenSideCastleCapable()) {
+builder.append("0");
+}
+if(board.blackPlayer().isKingSideCastleCapable()) {
+builder.append("k");
+}
+if(board.blackPlayer().isOueenSideCastleCapable()) {
+builder.append("q");
+}
+final String result = builder.toString();
+{eturn result.isEmpty() ? "-" : result;
+}
+
+
+b.3.3) 
+private static String calculateEnPassantSquare(final Board board) {
+final Pawn enPassantPawn = board.getEnPassantPawn();
+if(enPassantPawn != null) {
+return BoardUtils.getPositionAtCoordinate(enPassantPawn.getPiecePosition() +
+(8) * enPassantPawn.getPieceAlliance().get0ppositeOirection())L
+}
+return "-";
+} 
+
+b.3.4) 
+
+private static String calculateBoardText(final Board board) {
+final StringBuilder builder = new StringBuilder();
+for(int i = O; i < BoardUtils.NUM_TILE$; i++) {
+final String tileText = board.getTile(i).toString();
+builder.append(tileText);
+
+}
+
+builder.insert(B, "/");
+
+builder.insert(17, "/"); I
+
+builder.insert(26, "/");
+
+builder.insert(35, "/");
+
+builder.insert(44, "/");
+
+builder.insert(53, "/");
+
+builder.insert(az, "/");
+
+return builder.toString().replaceAll("--~-----", "8")
+.replaceAll("---—---", "7")
+.replaceAll("------", "6")
+.replaceAll("-----", "5")
+.replaceAll("----", "4")
+.replaceAll("---", "3")
+.replaceAll("--", "2")
+.replaceAll("-", "1");
+
+}
+
+
+b.3.5)
+In player.java
+
+public boolean isKingSideCastleCapable() {
+
+return this.playerKing.isKingSideCastleCapable();
+}
+public boolean isQueenSideCastleCapable() {
+
+return this.playerKing.isOueenSideCastleCapable(H;
+}
+
+
+In King.java
+
+
+add var
+private final boolean isCastled;
+private final boolean kingSideCastledCapable;
+private final boolean queenSideCastledCapable;
+
+public boolean isCastled() {
+	return this.isCastled;
+}
+
+public boolean isKingSideCastleCapable() {
+return this.isKingSideCastleCapable;
+
+}
+
+public boolean isOueenSideCastleCapable() {
+return this.isQueenSideCastleCapable;
+}
+
+public King(final Alliance pieceAlliance,
+final int piecePosition,
+final boolean kingSideCastleCapable,
+final boolean queenSideCastleCapable) {
+super(PieceType.KING, piecePosition, pieceAlliance, true);
+this.isCastled = false;
+this.kingSideCastleCapable = kingSideCastleCapable;
+this.queenSideCastleCapable = queenSideCastleCapable;
+} 
+
+public King(final Alliance pieceAlliance,
+final int piecePosition,
+final boolean isFirstMove,
+final boolean isCastled,
+final boolean kingSideCastleCapable,
+final boolean queenSideCastleCapable) {
+super(PieceType.KING, piecePosition, pieceAlliance, isFirstMove);
+this.isCastled = isCastled;
+this.kingSideCastleCapable = kingSideCastleCapable;
+this.queenSideCastleCapable = queenSideCastleCapabled
+}
+
+
+@Override
+public King movePiece(final Move move) {
+return new King(move.getMovedPiece().getPieceAlliance(),
+move.getOestinationCoordinatel),
+false,
+move.isCastlingMove().
+Ifalse,
+
+false);
+
+}	

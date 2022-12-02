@@ -1,0 +1,176 @@
+Objective:flip board and highlight legal moves on board
+
+
+
+1) 
+
+a)  In table.java
+
+//tells if board is in normal fashion or flipped
+how? 2 methods
+ 	first:  returns other one for ex Normal -> returns flipped
+							Flipped -> returns normal
+	traverse method : tells how to traverse board tiles using the strategy
+		for ex normal: traverse same way
+		       flipped: invoke convinience method : list.reverse
+			It will reverse the lists		
+
+
+
+public enum BOardDirection {
+ 
+NORMAL 
+   { 
+    @Override
+    List<TilePanel> traverse(final List<TilePanel> boardTiles) {
+		return boardTiles;
+	}
+	
+    @Override
+    BoardDirection opposite() {
+	return FLIPPED;
+    }
+},
+FLIPPED {
+    @Override
+    List<TilePanel> traverse(final List<TilePanel> boardTiles) {
+		return Lists.reverse(boardTiles);
+	}
+	
+    @Override
+    BoardDirection opposite() {
+	return NORMAL;
+    }
+
+
+}
+
+
+b) add private BoardDirection boardDirection to table class
+
+c) when constructing table : board orientation is normal
+	this.boardDirection = Board.Direction.NORMAL
+
+
+d) In table.java
+	Add a menu item in preferences menu
+	menu item has a listener
+	when listener invoked by user click
+	get opposite board direction, How?
+		check whats current board direction
+		get opposite of normal
+		call draw board
+		draw board -> invokes enum's method traverse on on tiles based on direction	//for loop
+			if board direction normal -> traverse in same order that they came
+			if opposite direction -> traverse opposite order
+	
+	Note: createPreferencesMenu in JMenuBar createTableMenuBar
+		
+
+
+private JMenu createPreferencesMenu() {
+	
+	final JMenu preferncesMenu = new JMenu("Preferences");
+	final JMenuItem flipBoardMenuItem = new JMenuItem("Fllip Board");
+	flipBoardMenuItem.addActionListener(new ActionListener(){
+		
+		@Override 
+		public void actionPerformed(final ActionEvent e) {
+			boardDirection = boardDirection.opposite();
+			boardPanel.drawBoard(chessBoard);
+		}
+	});
+	preferencesMenu.add(flipBoardMenuItem);
+	return preferencesMenu;
+}
+
+
+e) Run
+
+Preferences -> Flip Board
+
+//board gets flipped
+
+
+
+f) How to highlight legal moves
+
+
+f.1) highlightLegals() in TilePanel
+
+if want to highlight legal moves (decided in some option)
+find the piece selected(using pieceLegalMoves), find legal moves for that piece selected
+if humanMovedPiece is not null(i.e a piece was selected)
+ if alliance for piece = current player -> then calculate legalMoves for that player
+	else return empty
+
+
+if move's destination is current tile //piece to move location found
+draw on that tile //add label with Image Icon  //add green dot 
+
+RUN:
+Select tile -> legal moves get shown
+
+	//few moves will be shown
+
+
+
+f.2) How to make predecate work correct?
+	
+	
+	private void highlightLegals(final Board board) {
+		if(true) {
+		for(fina1 Move move : p1eceLega1HdQes(board)) {
+		if(move.getoestinationCoordinate() == this.ti1cId) {
+		  try {
+			  addtnew JLabel(ncw ImageIcon(ImageIO.read(new File("art/nisc/grccn_dot.png")))));
+			} catch(Exception e) {
+			   e.print$tackTrace():
+			}
+		    }
+		  }
+		}
+ 	   }
+
+
+f.3) improve on if(true)code
+ in createPreferencesMenu(){}
+
+add preferencesMenu.addSeparator();
+
+final JChessBoxMenuItem legalMoveHighlighterCheckbox = new JCheckBoxMenuItem("Highlight legal moves", false);
+
+legalMoveHighlighterCheckbox.addActionListener(new ActionListener() {
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		highlightLegalMoves = legalMoveHighlighterCheckbox.isSelected();
+		
+ }
+});
+
+f.4) add highlightLegalMoves  as member field
+	private boolean highlightLegalMoves ;
+
+f.5) in constructor
+
+this.highlightLegalMoves = false;
+
+
+f.6) replace 
+if(true) with
+if(highlightLegalMoves) in highlightLegalMoves()
+
+
+f.7) In createPreferencesMenu
+
+createPreferencesMenu.add(legalMoveHighlighterCheckbox);
+
+
+OUTPUT:
+
+RUN
+
+Preferences -> 	highlight legal Moves		//when checked on -> click piece -> shows legal move
+	else does not
+
+

@@ -1,0 +1,293 @@
+Objective:
+panel on left
+panel on right
+
+
+
+a)In TakenPiecesPanel.java
+
+Collections.sort(whiteTakenPieces, new Comparator<Piece>() {
+@Override
+pllblic int compare(Piece 01, Piece 02) {
+return Ints . compare(o1. getPieceValue( ) , 02. getPieceValue( ) );
+}
+});
+
+
+b) In Piece.java
+
+//What this does? delegates piece type
+public int getPieceValue{
+
+}
+
+b.1) In Piece.java in enum PieceType
+
+public int getPieceValue() {
+	return this.pieceValue;
+}
+
+b.3) add pieceValue arg to constructor
+
+private String pieceName;
+private int pieceValue;
+
+ PieceType(final String pieceName, final int pieceValue) {
+	this.pieceName = pieceName;
+	this.pieceValue = pieceValue;
+}
+
+
+b.4) pawn < knight = bishop < rook < queen < king in terms of value
+
+	
+PAWN(100, "P"){
+}
+KNIGHT(300, "P"){
+}
+BISHOP(300, "P"){
+}
+ROOK(500, "P"){
+}
+QUEEN(900, "P"){
+}
+KING(10000, "P"){
+}
+
+
+
+
+c) Create GameHistoryPanel in gui package //GUI Code
+create scrollPane
+setColumnHeaderView
+scrollPane.setPreferredSize(HISTORY_PANEL_DIMENSION)
+add scrollPane, to BOrderLayout.CENTER
+setVisible to true
+
+
+d) creaete redo method, input board and moveLog
+
+
+
+public class GameHistoryPanel extends JPanel 
+
+private final DataModel model;
+private final JScrollPane scrollPane;
+private static final Dimension HISTORY_PANEL_DIMENSION = new Dimension(100,400);
+
+GameHistoryPanel(){
+
+	this.setLayout(new BorderLayout());
+	this.model = new DataModel();
+	final JTable table = new JTable(model);
+	table.setRowHeight(15);
+	this.scrollPane	= new JScrollPane(table); 	//if no. of moves exceeds window pane , will create scrolll panel	 to roll
+	scrollPane.setColumnHeaderView(table.getTableHeader());
+	scrollPane.setPreferredSize(HISTORY_PANEL_DIMENSION);
+	this.add(scrollPane,BorderLayout.CENTER);
+	this.setVisible(true);
+		
+ }
+
+ void redo(final Board board, final Table.Movelog moveLog) {
+	
+ }
+ 
+}
+
+e) Create data model : using Jtables
+ e.1) Create List of values
+ e.2) create string type var NAMES
+ e.3) create another class Row with cosntructor
+		//e4 and d5 gets captured after move
+		header and row
+
+ e.4) Create DataModel constructor
+ e.5) create clear()
+		setRowCount to 0
+			
+	e.5.1) override defaultTableModel methods
+			These methods will tell how to render table	
+			getRowCount() -> if values = null, return 0 else return values.size()
+
+	e.5.2) override getColumnCount()
+			return NAMES.length
+			
+	e.5.3) getValueAt() //input row and col
+					how to retireve the cell on row and col
+	
+	e.5.4) setValueAt()  , input: aValue, row, col	
+		
+			Row currentRow
+			if values.size()  <= row
+			currentRow = new Row();
+			this.values.add(currentRow)
+			else 
+				currentRow = this.values.get(row)
+			if col == 0
+				currentRow of setWhite move set to String representation of avalue 
+			else if col == 1
+				currentrow setBlackMove aValue
+				
+			fireTableCellUpdated 
+			//Read swing tutorials for better understanding jtables and model pattern
+
+
+	e.5.5) getColumnName()
+			return Move.class
+		 getColumnName()
+			return NAMES[column];
+
+We have all pieces needed for model for redraw
+
+----------------------------------------------------------------------			
+
+private static class DataModel extends DefaultTableModel {
+	private final List<Row> values;
+	private static final String[] NAMES = {"White","Black"};
+
+	DataModel() {
+		this.values = new ArrayList<>();
+	}
+	public void clear() {
+		this.values.clear();
+		setRowCount(0);
+	}
+	@Override
+	public int getRowCount() {
+		if(this.values == null) {
+			return 0;
+		}	
+		return this.values.size();
+	}
+
+	@Override
+	public int getColumnCount() {
+		return NAMES.length;
+	}
+
+	@Override 
+	public Object getValueAt(final int row, final int column) {
+		final Row currentRow = this.values.get(row);
+		if(column == 0) {
+			return currentRow.getWhiteMove();
+		} else if(column == 1) {
+			return currentRow.getBlackMove();
+		}
+		return null;
+	}
+
+	@Override
+	public void setValueAt(final Object aValue,
+		final int row,
+		final int column) {
+		final Row currentRow;
+		if(this.values.size() <= row) {
+			currentRow = new Row();
+			this.values.add(currentRow);
+		} else {
+		currentRow = this.values.get(row);
+		}
+		if(column == 0) {
+		currentRow.setWhiteMove((String)aValue);
+		} else if(column == 1) {	
+		currentRow.setBlackMove((String)aValue);
+		fireTableCellUpdated(row, column);
+		}
+	}
+}
+
+ 	private static class Row {
+		private String whiteMove;
+		private String blackMove;
+
+		Row() {
+			
+		}
+		
+		public String getWhiteMove() {
+			return this.whiteMove;
+		}
+
+		public String getBlackMove() {
+			return this.blackMove;
+		}
+
+		public void setWhiteMove(final String move) {
+			this.whiteMove = move;
+		}
+
+		public void setBlackMove(final String move) {
+			this.blackMove = move;	
+		}
+	}
+
+
+f) In GameHistoryPanel
+ 
+ f.1)redo()
+	set currentRow = 0
+	clear this.model()
+	Loop move of type Move in moveHistory
+		moveText = toString() from move object
+		if MovedPiece's move's alliance  is whtie
+		  set model value : as moveText in current Row , col 0
+
+		else if MovedPiece's move's alliance  is black
+			mosetValue	 of model with moveText on current Row,col 1
+
+		increment row
+
+	if moveHistory's size is >0 --> get movehistory's move's size
+		set moveText as lastmove's tostring
+	
+	if last move's movedPiece's alliance is white
+		set model's value with "moveText+"  //if check of check mate that move highlighted
+
+	
+	
+ f.2) create vertical of type JScrollBar
+	//if no. of  moves exceed scroll panel, auto advanced
+
+final JScrollBar vertical = scrollPane.getVerticalScrollBar();
+vertical. setValue(vertical. getMaximum( )D;
+
+f.3)
+	if board current player is in checkmate -> return #
+	else -> return +
+
+
+f.4)
+	private String calculateCheckAndCheckMateHash(final Board board) {
+		if(board.currentPlayer().isInCheckMate()) { I
+	return "#";
+		} else if(board.currentPlayer().isInCheck()) {
+	return "+";
+	}
+	return "";
+	 } 
+	
+ 			
+				  
+
+void redo(final Board board,
+final MoveLog moveHistory) {
+int currentRow = O;
+this.model.clear();
+for(final Move move : moveHistory.getMoves())Ii
+final String moveText = move.toString();
+if(move.getMovedPiece().getPieceAlliance().isWhite()) {
+this.model.setValueAt(moveText, currentRow, O);
+} else if(move.getMovedPiece().getPieceAlliance().isBlack()) {
+this.model.setValueAt(moveText, currentRow, 1)b
+}
+}
+}
+
+
+if(moveHistory.getMoves().size() > 0) {
+final Move lastMove = moveHistory.getMoves().get(moveHi§tory.size() - 1);
+final String moveText = lastMove.toString();
+if(lastMove. getMovedPiece( ) . getPieceAlliance() . isWhiteO ) {
+this.model.setValueAt(moveText + calculateCheckAndCheckMateHash(board). currentRow — 1, 1);
+}

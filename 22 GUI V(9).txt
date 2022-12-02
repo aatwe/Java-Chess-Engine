@@ -1,0 +1,243 @@
+Objective: 
+
+
+a) What problems:
+
+a.1) diagonal legal moves visible for pawn
+
+In Pawn.java
+one of the conditions : SEVENTH_RANK and SECOND_RANK is true
+
+
+if(currentCandidateOffset == 8 && Eboard.getTile(candidateDestinationCoordinate).isTileOccupied()) {
+//TODO more work to do here (deal with promotions)!!!!
+legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
+} else if(currentCandidateOffset == 16 && this.isFirstMove() &&
+((BoardUtils.SEVENTH_RANK[this.piecePosition] && this.getPieceAlliance().isBlack()) ||
+(BoardUtils.SECOND_RANK[this.piecePosition] && this.getPieceAlliance().isWhite()))D {
+final int behindCandidateDestinationCoordinate = this.piecePosition + (this.pieceAlliance.getDirection() * 8);
+if(Eboard.getTile(behindCandidateDestinationCoordinate).isTileOccupied() &&
+Eboard.getTile(candidateDestinationCoordinate).isTileOccupied()) {
+legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate)):
+}
+
+a.2) pawn jumps not visible for black
+
+In Piece.java
+
+isFirstMove is hardcoded as false
+
+a.2.1) add boolean isFirstMove() in constructor
+
+
+public abstract class Piece {
+protected final PieceType pieceType;
+protected final int piecePosition;
+protected final Alliance pieceAlliance;
+protected final boolean isFirstMove;
+r\ private final int cachedHashCode;
+Piece(final PieceType pieceType,
+final int piecePosition,
+final Alliance pieceAlliance) {
+this.pieceType = pieceType;
+this.pieceAlliance = pieceAlliance;
+this.piecePosition = piecePosition;
+//TODO more work here!!
+this.isFirstMove = isFirstMove;
+this.cachedHashCo e = computeHashCode();
+}
+
+
+a.2.2) add a convinience constructor for each of the pieces
+
+constructor passes : alliance, position and firstMove and true
+
+create another constructor 
+
+for ex for rook
+
+private final static int[] CANDIDATE_MOVE_VECTOR_CO0RDINATES = { -8, -1, 1, 8 };
+public Rook(final Alliance pieceAlliance,
+final int piecePosition) {
+super(PieceType.ROOK, piecePosition, pieceAlliance, true);
+}
+
+
+public Rook(final Alliance pieceAlliance,final int piecePosition, final boolean isFirstMove) {
+	super(PieceType.ROOK, piecePosition, pieceAlliance, isFirstMove);
+}
+
+//do same for bishop and other pieces
+
+
+a.2.3) run again
+
+preferences -> Highlight legal moves , both side mvoes visible correctly
+
+
+b) Distinguish move types for different pieces when generating legal moves
+
+change pawn -> MajorMove in offset 16
+specify pieceOnCandidate in offset 7 and 9
+	
+	if(currentCandidateOffset == 8 && !board.getTile(candidateDestinationCoordinate).isTileOccupied()) {
+//TDDO more work to do here (deal with promotions)!!!!
+legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
+} else if(currentCandidateOffset == 16 && this.isFirstMove() &&
+((BoardUtils.SEVENTH_RANK[this.piecePosition] && this.getPieceAlliance().isBlack()) ll
+(BoardUtils.SECOND_RANK[this.piecePosition] && this.getPieceAlliance().isWhite()))) {
+final int behindCandidateDestinationCoordinate = this.piecePosition + (this.pieceAlliance.getDirection() * 8);
+if(!board.getTile(behindCandidateDestinationCoordinate).isTileOccupied() &&
+Eboard.getTile(candidateDestinationCoordinate).isTileOccupied()) {
+legalMoves.add(new PawnJump(board, this, candidateDestinationCoordinate));
+}
+
+} else if(currentCandidateOffset == 7 &&
+!((BoardUtils.EIGHTH_COLUMN[this.piecePosition] && this.pieceAlliance.isWhite() ll
+(BoardUtils.FIRST;COLUMN[this.piecePosition) && this.pieceAlliance.isBlack())))) {
+if(board.getTile(candidateDestinationCoordinate).isTileOccupied()) {
+final Piece pieceOnCandidate = board.getTile(candidateDestinationCoordinate).getPiece();
+if(this.pieceAlliance != pieceOnCandidate.getPieceAlliance()) {
+//TODO more to do here
+legalMoves.add(new PawnAttackMove(board, this, candidateDestinationCoordinate,pieceOnCandidate);
+}
+}
+} else if(currentCandidateOffset == 9 &&
+!((BoardUtils.FIRST;COLUMN[this.piecePosition) && this.pieceAlliance.isWhite() ll
+(BoardUtils.EIGHTH_COLUMN[this.piecePosition) && this.pieceAlliance.isBlack())))) {
+if(board.getTile(candidateDestinationCoordinate).isTileOccupied()) {
+final Piece pieceOnCandidate = board.getTile(candidateDestinationCoordinate).getPiece();
+if(tbis.pieceAlliance != pieceOnCandidate.getPieceAlliance()) {
+//TODO more to do here
+legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate,pieceOnCandidate));
+}
+}
+}
+
+
+
+
+c) In Move.java
+
+c.1) add isFirstMove variable
+
+public abstract class Move {
+protected final Board board;
+protected final Piece movedPiece;
+protected final int destinationCoordinate;
+protected final boolean isFirstMove;
+
+
+public static final Move NULL_MOVE = new NullMove();
+private Move(final Board board,
+final Piece movedPiece,
+final int destinationCoordinate) {
+this.board = board;
+this.movedPiece = movedPiece;
+this.destinationCoordinate = destinationCoordinate;
+this.isFirstMove = movedPiece.isFirstMove();
+
+}
+
+private Move(final Board board,final int destinationCoordinate) {
+	this.board = board;
+	this.destinationCoordinate = destinationCoordinate;
+	this.movedPiece = null;
+	this.isFirstMove = false;
+}
+
+
+c.2) update them in hashCode method
+this.movedPiece.getPiecePosition();
+
+add getCurrentCoordinate() == otherMove.getCurrentCoordinate() 
+
+
+@Override
+
+public int hashCode() {
+final int prime = 1;
+int result = 1;
+result = prime * result + this.destinationCoordinate;
+result = prime * result + this.movedPiece.hashCode();
+result = primt * result + this.movedPiece.getPiecePosition();
+
+return result;
+
+}
+
+
+@Override
+public boolean equals(final Object other) {
+if(this == other) {
+muwntwe;
+}
+if(!(other instanceof Move)) {
+retu false;
+} 53‘
+final Move otherMove = (Move) other;
+return getCurrentCoordinate() == otherMove.getCurrentCoordinate() &&
+getDestinationCoordinate() == otherMove.getDestinationCoordinate() &&
+getMovedPiece().equals(otherMove.getMovedPiece()):
+}
+
+
+
+c.3) MajorMove
+  c.3.1) add equals()
+  c.3.2) add toString()
+
+
+public static final class MajorMove extends Move {
+
+public MajorMove(final Board board,
+final Piece movedPiece,
+final int destinationCoordinate) {
+super(board, movedPiece, destinationCoordinate);
+}
+
+@Override
+public boolean equals(final Object other) {
+	return this == other ||other instanceOf MajorMove && super.equals(other);
+}
+
+public String toString() {
+  return movedPiece.getPieceType().toString() + BoardUtils.getPositionAtCoordinate(this.destinationCoordinate);
+}	
+
+}
+
+
+  c.3.3) In BoardUtils.java
+
+create 2 fields and 2 methods
+
+	public static final String[] ALGEBRAIC_NOTATION = initializeAlgebraicNotation();
+	public static final Map<String, Integer> POSITION_TO_COORDINATE = initializePositionToCoordinateMap();
+
+	public static int getCoordinateAtPostiion(final String position) {
+		return POSITION_TO_COORDINATE.get(position);
+	}
+	public static int getPositionAtCoordinate(final int coordinate) {
+		 return  ALGEBREIC_NOTATION[coordinate];
+	}
+
+these 2 methods will be used in toString() method of move class
+What objective: if input: a8 -> return 0		
+			if input: b8 -> return 1
+
+
+
+What next? update move class
+
+enpassant make work
+
+panels on GUI
+
+--Engine complete--
+
+
+after that AI: that will parse games we download from internet 
+______________________________________________________________________________________________________________
+
+		

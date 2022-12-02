@@ -1,0 +1,99 @@
+1) Objective; see move executed 
+
+
+a) what till now?
+
+click on source tile with piece on it 
+	click on destination tile(legal destination location)
+		See the Move of piece
+
+b) What mouseClicked() is doing?
+
+  b.1) when mouse on tile clicked
+  b.2) we know Board is jPanel and each tile is also jPanel
+  b.3) when rightclick -> mouseListener captures event
+	//isRightMouseButton built in jdk  //	designated to cancel all selections
+	//source tile = empty =null
+	//destination tile = null
+	//humanMovedPiece = null
+
+  b.4) if leftclick -> 
+	//check if sourceTile selection is made
+		 i.e check if == null
+			//get the tile	 
+			sourceTile = chessBoard.getTile.getPiece() //get tile then get Piece
+	 		//get the piece, assign human moved piece to piece
+			if(humanMovedPiece == null) {
+				sourceTile = null;
+			}
+			//if humanMovedPiece is empty  //i.e we clicked empty tile	 
+			set sourceTile = null
+			//exit
+		 }
+		} else {
+			//get a legal move that corresponds to source selected  and destination selected
+			destinationTile = chessBoard.getTile(tileId);
+			
+			final Move move = Move.MoveFactory.createMove(chessBoard, sourceTile.getTileCoordinate(), destinationTile.getTileCoordinate());
+
+			//createMove will look in list of all legal moves for board, else returns null
+
+			//create MOve transition
+			//write a method public Board getTransitionBoard(){return this.transitionBoard;}	
+			//what is this? the board we will transition to
+			
+			final MoveTransition transition = chessBoard.currentPlayer().makeMove(move);
+			if(transition.getMoveStatus().isDone()) {
+				chessBoard = transition.getTransitionBoard();
+				//add move made to move log
+				}
+				sourceTile = null;
+				destinationTile = null; 
+				humanMovedPiece = null; 
+			
+		}
+		//How to GUI update?
+		SwingUtilities.invokeLater(new Runnable()) {
+			@Override
+			public void run() {
+			//redraws the board with given chessboard
+				boardPanel.drawBoard(chessBoard)
+			}
+
+		});
+
+
+	  }
+	}
+}
+
+
+2)
+		//inside BoardPanel class ->Table.java
+		create public void drawBoard(final Board board) {
+			removeAll();
+			for(final TilePanel tilePanel : boardTiles) {
+				tilePanel.drawTile(board);
+				add(tilePanel);
+				
+			}
+			validate();
+			repaint();
+
+		}
+
+
+3) add method  in Table.java //takes care of highlighting tile when click
+
+	public void drawTile(final Board board){
+		assignTileColor();
+		assignTilePieceIcon(board);
+		validate();
+		repaint();
+}
+
+
+4) RUN
+
+select piece -> move  //piece moves perfectly
+cant play black move though yet

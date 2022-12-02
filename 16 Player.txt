@@ -1,0 +1,633 @@
+1)	Create in Board class
+ 	private final WhitePlayer whitePlayer;
+	private final BlackPlayerblackPlayer;
+
+	//both classes will be related by common superclass
+	
+	
+2) 	Also add in Board class
+		this.whitePlayer = new WhitePlayer(this, whiteStandardLegalMoves, blackStandardLegalMoves);
+		this.blackPlayer = new BlackPlayer(this, whiteStandardLegalMoves, blackStandardLegalMoves);
+		
+
+3) Create WhitePlayer.java and BlackPlayer.java in player package
+
+	Both will extend player
+
+	Create Player.java
+
+
+4) Player class will be abstract,.
+	will track the board on which player playing
+	will track the king playerKing;	
+	will track the collection of legalMoves 
+	Create constructor for Player //arg: final Board board, final Collection<Move> legalMoves, final Collection<Move> opponentMoves			
+		this.board = board
+		this.playerKing = establishKing();
+		this.legalMoves = legalMoves;
+		
+5) 	Create King establishKing(){	//ensures if there is king for player on board, else we are not in legal state
+		for(final Piece piece : getActivePieces()) {
+			if(piece.getPieceType().isKing()) {
+				return (King) piece;
+			}
+		}
+
+	}
+
+
+	public abstract Collection<Piece> getActivePieces();
+
+------------------------------------------------------------------------------------------------------
+6) implement getActivePieces in BlackPlayer.java and WhitePlayer.java
+
+@Override
+	public Collection<Piece> getActivePieces() {
+		return this.board.getBlackPieces();
+	}
+
+
+
+
+7) WE HAVE TRACKED, NOW EXTRACT IN Board.java
+
+public  Collection<Piece> getBlackPieces() {
+		return this.blackPieces;
+	}
+
+	public  Collection<Piece> getBlackPieces() {
+		return this.whitePieces;
+	}
+
+
+
+8) Also call super(); in BlackPlayer.java and Player.java
+
+
+8)  Create  PieceType pieceType in Piece constructor in Piece class
+
+9)  this.pieceType = pieceType
+
+10)  public PieceType getPieceType() {
+		return this.pieceType;
+	}
+ 
+
+11) add super(PieceType.KING, piecePosition, pieceAlliance)	//and similarly for all pieces in  every piece's constructor
+
+12) create abstract boolean isKing() {return false;}, isBishop(){return false;} ... in Piece.java
+
+13) if cannot establish a king -> throw runtime exception	//board setup is invalid
+------------------------------------------------------------------------------------------------------
+Player II
+Demo:
+ we will query in database for book moves, 12-13 book moves , and then AI searching for moves
+	no. of book moves will reduce as we go ahead
+	and once out of book ==> actual searching will begin
+
+a) in Player.java we have a abstract getActivePieces()
+	
+	public abstract Collection<Piece> getActivePieces();		//what is this defined polymorphically on? black player and white player
+												//what does it return? black pieces or white pieces
+
+
+b) In BlackPlayer.java and WhitePlayer.java add
+	public Alliance getAlliance() {
+		return Alliance.BLACK;
+	}
+
+	public Alliance getAlliance() {
+		return Alliance.WHITE;
+	}
+
+c) create getOpponent() in Player.java
+
+	public abstract Player getOpponent();
+
+
+	Implement in blackPlayer.java and  WhitePlayer.java 
+	//blackPlayer.java
+
+	public Player getOpponent() {
+		return null;
+	}
+
+	//WhitePlayer.java 
+	
+	public Player getOpponent() {
+		return this.board.blackPlayer();
+	}
+	
+	public Player getOpponent() {
+		return this.board.whitePlayer();
+	}
+
+d) In Board.java
+
+	public Player whitePlayer() {
+		return this.whitePlayer;
+	} 
+
+	public Player blackPlayer() {
+		return this.blackPlayer;
+	} 	
+
+
+---------What we did? helper routines that we implemented------------------------------------------------------------------------------------------------------
+//more methods to flush out later
+e) 
+public boolean isMovelegal() {
+	return this.legalMoves.contains(move);		//what this does? move passed is contained in player's legal move collection
+}
+
+
+f)
+public boolean isInCheck() {
+	return false;
+}
+
+g) 
+public boolean isInCheckMate() {
+	return false;
+}
+
+h) 
+public boolean isInCheckMate() {
+	return false;
+}
+
+i) 
+public boolean isInCastled() {
+	return false;
+}
+
+j) //use new class MoveTransition for this method	//create the class in Player package
+		//why this class? when make a move all info about transition is inside this for ex what board transitioned to
+
+public MoveTransition makeMove(final Move move) {
+	return null;
+}
+
+
+---
+public class MoveTransition (final Board transitionBoard, final Move move, final Movestatus moveStatus)		//create Movestatus class in package class//tells if we were able to do the move or not(check/illegal move for ex etc )
+{
+	this.transitionBoard = transitionBoard
+	this.move = move;
+	this.moveStatus = moveStatus
+}									
+
+}
+
+---------------
+Player III
+what done? backbone for player class : abstract,has several methods, establishKing 
+k) IsInCheck 
+
+
+how to calculate isInCheck ?  in Player constructor 
+	
+1) initialize private final boolean isInCheck;
+
+2) this.isInCheck = !Player.calculateAttacksOnTile(this.playerKing().getPiecePosition(), opponentMoves).isEmpty();
+		//check for opponent moves -> if any attacks king -> king is in check
+
+3) public boolean isInCheck() {
+	return this.isInCheck();
+}
+
+4) implement calculateAttacksOnTile(
+
+What below does?
+	1) go thorugh each enemy moves
+	2) see destination coordinate of enemy move
+	3) if = king's position --> attacking the king -> return list of moves attacking the king
+	4) if list not empty ->  king is in check
+
+private static Collection<Move> calculateAttacksOnTile(int piecePosition, Collection<Move> opponentMoves) {
+	final List<Move> attackMoves = new ArrayList<>();
+	for(final Move move : moves) {
+		if(piecePosition == move.getDestinationCoordinate() {
+			attackMoves.add(move);
+		 }
+	}	
+	return ImmutableList.copyOf(attackMoves);
+}
+
+5) add a method 
+	public int getDestinationCoordinate() {
+		return this.destinationCoordinate;
+		
+	}
+-----------
+
+l) IsInCheckmate  , IsInStaleMate
+
+1) Check if king is in check
+	if it can escape or not
+
+
+	
+public boolean isInCheck() {
+	return this.isInCheck() && !hasEscapeMoves();
+}	
+
+//What below does?
+	a) go through all legal moves for player
+	b) make the move on imaginary board
+	c) check if move status is done
+	d) return true if status done
+	e) else return false
+
+
+
+
+protected boolean hasEscapeMoves {
+	for(final Move move : this.legalMoves) {
+		final MoveTransition transition = makeMove(move);
+		if(transition.getMoveStatus().isDone()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+2) implement getMoveStatus() in MoveTransition
+
+
+public class MoveTransition (final Board transitionBoard, final Move move, final Movestatus moveStatus)		//create Movestatus class in package class//tells if we were able to do the move or not(check/illegal move for ex etc )
+{
+	this.transitionBoard = transitionBoard
+	this.move = move;
+	this.moveStatus = moveStatus
+}									
+public MoveStatus getMoveStatus() {
+	return this.moveStatus;
+}	 
+
+}
+
+3) moveStatus.java
+
+public enum MoveStatus {
+	DONE {
+	  @Override
+	  boolean isDone() {
+		return true;
+	 } 
+	};
+	abstract boolean isDone();
+}
+
+
+
+//Note: why cant we have isInCheckMate in constructor?
+		chicken and egg prolbem
+
+	when player constructor called? when board constructed
+	when board constructed -> we construct whitePlayer and Black Player --> Player () //super --> hasEscapeMoves() ----> makeMove() ---> constructing board 	//loop
+
+	//similar for isInStaleMate()
+
+
+
+4) public boolean isInStaleMate() {		//when staleMate? not IsInCheck and has no escape Moves
+	return !this.IsInCheck && !hasEscapeMoves(); 
+}
+
+--------------------
+m) 
+
+what done? created auxillary helper methods, check,stalemate,checkmate
+
+What objective next? how player can make a move?		//main logic in move class later
+
+
+1) In player.java
+
+public class MoveTransition (final Board transitionBoard, final Move move, final Movestatus moveStatus)		//create Movestatus class in package class//tells if we were able to do the move or not(check/illegal move for ex etc )
+{
+	this.transitionBoard = transitionBoard
+	this.move = move;
+	this.moveStatus = moveStatus
+}									
+public MoveStatus getMoveStatus() {
+	return this.moveStatus;
+}	 
+
+}
+
+
+public MoveTransition makeMove(final Move move) {
+
+	if(!isMoveLegal(move)) {					//if move is illegal -> just return same board (this.board)
+		return new MoveTransition(this.board,move, MoveStatus.ILLEGAL_MOVE);		//what is this transition from one board to next after making a move
+	}														//check MoveStatus									
+
+	final Board transitionBoard = move.execute();	//create abstract method execute in Move.java //empty for now
+										//inside execute() board builder which creates new board for us
+										//how will we not mutate existing? board class is immutable
+										//we will create new board using board builder to execute move	
+
+	final Collection<Move> kingAttacks = Player.calculateAttacksOnTile(transitionBoard.currentPlayer().getOpponent.getPlayerKing().getPiecePosition(),transitionBoard.currentPlayer().getLegalMoves())
+					//what ? currentplayer's opponent's king
+					transition current player's getLegaMoves
+
+						add private final Player currentPlayer  in Board class
+								this.currentPlayer = null
+						create method public Player currentPlayer() {
+							return this.currentPlayer; 
+						}
+
+	if (!kingAttacks.isEmpty()) {
+		 return  new Move Transition(this.board, move, MoveStatus.LEAVES_PLAYER_IN_CHECK)
+
+	}
+	return null;
+}
+
+2) 
+MoveStatus.java	//for ILLEGAL_MOVE isDone() will return false. Why? move is not done if it was illegal
+
+public enum MoveStatus {
+	DONE {
+		@Override
+		boolean isDone() {
+			return true;
+		}
+	},
+	ILLEGAL_MOVE {
+		@Override
+		boolean isDone() {
+			return false;
+		}
+	},
+	LEAVES_PLAYER_IN_CHECK; 
+	
+	abstract boolean isDone(); 
+}
+
+
+
+
+3) add currentPlayer in Board.java
+	
+	BOard constructor -> this.currentPlayer = null;
+
+   create 
+	public Player currentPlayer() {
+		return this.currentPlayer
+	}
+
+4) Insert below in Player.java
+
+ public King getPlayerKing() {
+	return this.playerKing;
+}
+
+5) In Player.java
+
+ public Collection<Move> getLegalMoves() {
+	return this.legalMoves;
+}
+
+6) If king attacks are empty , return  new Move Transition(this.board, move, MoveStatus.LEAVES_PLAYER_IN_CHECK)
+
+	Add LEAVES_PLAYER_IN_CHECK in MoveStatus
+
+7) return new MoveTransition(transitionBoard,move,MoveStatus.DONE);
+
+
+What done:
+	a) //if move is illegal(ile not part of collection of legal moves that player has) --> move transition wont take to new board -> movestatus :illegal
+
+	b) use Move to polymorphically execute the move //move.execute -> return new Board to transition to
+			check if there are any attacks on current player's king
+				if there are 
+
+	NOTE: makeMove is critical method
+	
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+public class Board {
+
+	private final List<Tile> gameBoard;
+	private final Collection<Piece> whitePieces;
+	private final Collection<Piece> blackPieces;
+
+	private final WhitePlayer whitePlayer;
+	private final BlackPlayerblackPlayer;
+
+
+	private  Board(Builder builder) {
+		this.	gameBoard = createGameBoard(builder);
+		this.whitePieces = calculateActivePieces(this.gameBoard, Alliance.WHITE);
+		this.blackPieces = calculateActivePieces(this.gameBoard, Alliance.BLACK);
+
+		final Collection<Move> whitestandardLegalMoves = calculateLegalMoves(this.whitePieces);
+		final Collection<Move> whitestandardLegalMoves = calculateLegalMoves(this.blackPieces);
+	
+		this.whitePlayer = new WhitePlayer(this, whiteStandardLegalMoves, blackStandardLegalMoves);
+		this.blackPlayer = new BlackPlayer(this, whiteStandardLegalMoves, blackStandardLegalMoves);
+		
+	}
+
+			@Override
+		public String toString() {
+			final StringBuilder builder = new StringBuilder();
+			for(int i=0; i< BoardUtils.NUM_TILES; i++) {
+				final String tileText = this.gameBoard	.get(i).toString();
+				builder.append(String.format(%3s", tileText));
+				if(i+1)% BoardUtils.NUM_TILES_PER_ROW == 0) {
+					builder.append("\n");
+				}
+			}
+			return builder.toString();
+		}
+
+	public  Collection<Piece> getBlackPieces() {
+		return this.blackPieces;
+	}
+
+	public  Collection<Piece> getBlackPieces() {
+		return this.whitePieces;
+	}
+
+	private Collection<Move> calculateLegalMoves(final  Collection<Piece> Pieces) {
+		
+		final List<Move> legalMoves = new ArrayList<>();
+
+		for(final Piece piece: pieces) {
+			legalMoves.addAll(piece.calculateLegalMoves(this));
+		}
+		
+		return ImmutableList.copyOf(legalMoves);
+
+
+	public Tile getTile(final int tileCoordinate) {
+		return gameBoard.get(tileCoordinate)
+	}
+	
+	private static Collection<Piece> calculateActivePiecesfinal (List<Tile> gameBoard, Alliance white ) {
+		
+		final List<Piece> activePieces = new ArrayList<>();
+
+		for(final Tile tile : gameBoard){
+			if(tile.isTileOccupied()) {
+				final Piece piece = tile.getPiece();
+				if(piece.getAlliance() == alliance) {
+					activePieces.add(piece);
+				}
+			}
+		}
+	
+		return ImmutableList.copyOf
+	}
+
+
+	public static List<Tile> createGameBoard(final Builder builder) {
+		final Tile[] tile = new Tile(BoardUtils.MM_TILES);
+		for(int i = 0; i< BoardUtils.NUM_TILES; i++){
+			tiles[i] = Tile.createTile(i, builder.boardConfig.get(i));
+		}
+		return ImmutableList.copyOf(tiles);
+	}
+
+	public static Board createStandardBoard() {
+		final Builder builder = new Builder();
+	
+	builder.setPiece(new Rook(Alliance.BLACK, 0));
+	builder.setPiece(new Knight(Alliance.BLACK, 1));
+	builder.setPiece(new Bishop(Alliance.BLACK, 2));
+	builder.setPiece(new Queen(Alliance.BLACK, 3));
+	builder.setPiece(new King(Alliance.BLACK, 4));
+	builder.setPiece(new Bishop(Alliance.BLACK, 5));
+	builder.setPiece(new Knight(Alliance.BLACK, 6));
+	builder.setPiece(new Rook(Alliance.BLACK, 7));
+	builder.setPiece(new Pawn(Alliance.BLACK, 8));
+	builder.setPiece(new Pawn(Alliance.BLACK, 9));
+	builder.setPiece(new Pawn(Alliance.BLACK, 10));
+	builder.setPiece(new Pawn(Alliance.BLACK, 11));
+	builder.setPiece(new Pawn(Alliance.BLACK, 12));
+	builder.setPiece(new Pawn(Alliance.BLACK, 13));
+	builder.setPiece(new Pawn(Alliance.BLACK, 14));
+	builder.setPiece(new Pawn(Alliance.BLACK, 15));
+	
+
+	builder.setPiece(new Rook(Alliance.WHITE, 0));
+	builder.setPiece(new Knight(Alliance.WHITE, 1));
+	builder.setPiece(new Bishop(Alliance.WHITE, 2));
+	builder.setPiece(new Queen(Alliance.WHITE, 3));
+	builder.setPiece(new King(Alliance.WHITE, 4));
+	builder.setPiece(new Bishop(Alliance.WHITE, 5));
+	builder.setPiece(new Knight(Alliance.WHITE, 6));
+	builder.setPiece(new Rook(Alliance.WHITE, 7));
+	builder.setPiece(new Pawn(Alliance.WHITE, 8));
+	builder.setPiece(new Pawn(Alliance.WHITE, 9));
+	builder.setPiece(new Pawn(Alliance.WHITE, 10));
+	builder.setPiece(new Pawn(Alliance.WHITE, 11));
+	builder.setPiece(new Pawn(Alliance.WHITE, 12));
+	builder.setPiece(new Pawn(Alliance.WHITE, 13));
+	builder.setPiece(new Pawn(Alliance.WHITE, 14));
+	builder.setPiece(new Pawn(Alliance.WHITE, 15));
+
+	builder.setMoveMaker(Alliance.WHITE);
+	
+	return builder.build();
+
+	}
+
+
+	public static class Builder {
+		Map<Integer, Piece> boardConfig;
+		Alliance nextMoveMaker;
+
+		public Builder() {
+			this.boardConfig = new HashMap<>();
+		}
+		
+		public Builder setPiece(final Piece piece){
+			this.boardConfig.put(piece.getPiecePosition(), piece);
+			return this;
+		}		
+		
+
+		public Builder setMoveMaker(final Alliance nextMoveMaker){
+			this.nextMoveMaker = nextMoveMaker;
+			return this;
+		}
+
+		public Board build() {
+			return new Board(this);
+		}
+	}
+}
+
+------------------------------------------------------------------------------------------------------
+
+WhitePlayer.java
+
+public class WhitePlayer extends Player {
+	public WhitePlayer(Board board, Collection<Move> whiteStandardLegalMoves,
+						 Collection<Move> blackStandardLegalMoves) {
+	super(board, whiteStandardLegalMoves, blackStandardLegalMoves)
+	}
+	
+}
+
+------------------------------
+
+BlackPlayer.java
+
+public class BlackPlayer extends Player {
+	public BlackPlayer(Board board, Collection<Move> whiteStandardLegalMoves,
+						 Collection<Move> blackStandardLegalMoves) {
+
+	super(board, blackStandardLegalMoves, whiteStandardLegalMoves);
+
+	@Override
+	public Collection<Piece> getActivePieces() {
+		return this.board.getBlackPieces();
+	}
+
+}
+
+------------------------------
+Player.java
+
+public class Player {
+
+  protected final Board board;
+  protected final King playerKing;
+
+	Player(final Board board, final Collection<Move> legalMoves, final Collection<Move> opponentMoves) {
+
+		this.board = board
+		this.playerKing = establishKing();
+		this.legalMoves = legalMoves;
+		
+	}
+
+  	private King establishKing(){	
+		for(final Piece piece : getActivePieces()) {
+			if(piece.getPieceType().isKing()) {
+				return (King) piece;
+			}
+		}
+
+	}
+	throw new  RuntimeException("Should not reach here, not valid board");
+
+
+	public abstract Collection<Piece> getActivePieces() {
+		return this.board.getWhitePieces();
+	}
+
+
+}
+

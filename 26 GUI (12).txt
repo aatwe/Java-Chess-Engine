@@ -1,0 +1,2 @@
+Obejctive: hook taken pieces and move history to GUI
+ 		+ other cleanup

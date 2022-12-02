@@ -1,0 +1,275 @@
+a) How to create GUI?
+GUI Programming java
+
+b) Create java class Table.java, keep JChess.java above engine and gui	//MVC Model 
+	b.1) will see 600x600 frame output
+
+
+
+c) Objective layout tiles on this frame : 0 to 63 and put graphics on tile
+
+   Add listener listening for click events on tile 
+	where events go? engine (source and destination tile)
+		if legal move -> move executed
+			gui refresh
+
+d) Menu options
+
+	d.1)  final JMenuBar tableMenuBar = new JMenuBar()
+	
+		 populateMenuBar(tableMenuBar)
+
+	 
+
+	d.2) create private void populateMenuBar (final JMenuBar tableMenuBar) {
+			tableMenuBar.add(createFileMenu());
+		}
+
+	d.3) private JMenu createFileMenu() {
+			final JMenu fileMenu = new JMenu("File");
+
+			final JMenuItem openPGN = new JMenuItem("Load PGN File");					//open game from pgn file
+			openPGN.addActionListener(new ActionListener()) {
+				@Override
+				public void actionPerformed(ActionEvent e) {						//opens pgn file when action performed
+					System.out.println("Open up the pgn file");
+				}
+			});
+ 
+			fileMenu.add(openPGN);
+			 
+			return fileMenu;
+			
+		}
+
+
+e) use above methods in table
+
+public class Table {
+	private final JFrame gameFrame;
+
+	private static Dimension OUTER_FRAME_DIMENSION = new Dimension(600,600); 
+
+
+	public Table() {
+		this.gameFrame = new JFrame("JChess");
+		final JMenuBar tableMenuBar = new JMenuBar();
+		populateMenuBar(tableMenuBar);
+
+		this.gameFrame.setJMenuBar(tableMenuBar);
+		this.gameFrame.setSize(OUTER_FRAME_DIMENSION);
+		this.gameFrame.setVisible(true);
+	}
+}
+
+
+
+
+
+
+public class JChess {
+
+	public static void main(String[] args) {
+		Board board = Board.createStandardBoard();
+
+		System.out.println(board)
+
+		Table table = new Table();
+	}
+}
+
+
+f) Run JChess
+
+
+1) 
+
+R N B Q K B N R
+P P P P P P P P
+- - - - - - - -
+- - - - - - - -
+- - - - - - - -
+- - - - - - - -
+P P P P P P P P
+R N B Q K B N R
+	
+
+2) a 600x600 Menu bar opens 
+
+	File -> Load PGN File --> PGN file opens up 
+
+
+
+g) Lets work more on GUI
+How to layout visual components?
+
+  g.1) use loose mvc style
+  g.2) decouple engine of game from the way we visualize
+ 
+
+h) optimize
+
+  
+
+
+
+public class Table {
+	private final JFrame gameFrame;
+
+	private static Dimension OUTER_FRAME_DIMENSION = new Dimension(600,600); 
+	private static Dimension BOARD_PANEL_DIMENSION = new Dimension(400,350); 
+	private static Dimension TILE_PANEL_DIMENSION = new Dimension(400,350);
+
+	public Table() {
+		this.gameFrame = new JFrame("JChess");
+		final JMenuBar tableMenuBar = createTableMenuBar();			//populateMenuBar();
+		populateMenuBar(tableMenuBar);
+
+		this.gameFrame.setJMenuBar(tableMenuBar);
+		this.gameFrame.setSize(OUTER_FRAME_DIMENSION);
+		this.gameFrame.setVisible(true);
+	}
+}
+	
+
+create private void createTableMenuBar(); (final JMenuBar tableMenuBar) {
+			final JMenuBar tableMenuBar = new JMenuBar();
+			tableMenuBar.add(createFileMenu());
+			return tableMenuBar;
+		}
+
+
+i) 
+add 2 classes private class BoardPanel extends JPanel
+
+		 	private class TilePanel extends JPanel
+
+
+	1)  create list of tile panels named boardTiles
+	2)  create constructor for BoardPanel
+			call GridLayout for 8x8 // this maps to chessboard
+			instantiate list as new ArrayList
+	3) loop over from 0 to BoardUtils.NUM_TILES
+		 create TilePanel variable of type Tile Panel	//has input parameters
+		 add tilePanel to boardTiles using add()
+		 again add(tilePanel);
+		
+	4) setPreferredSize(BOARD_PANEL_DIMENSION);
+	5) validate()
+	6) 
+
+private class BoardPanel extends JPanel{
+	final List<TilePanel> boardTiles;
+	BoardPanel() {
+		super(new GridLayout(8,8));
+		this.boardTiles = new ArrayList<>();
+		for(int i = 0; i< BoardUtils.NUM_TILES; i++) {
+			final TilePanel tilePanel = new TilePanel();
+			this.boardTiles.add(tilePanel);
+			add(tilePanel);
+		}
+	}
+}
+private class TilePanel extends JPanel{
+	
+}
+
+	1) create tileId variable
+	2) constructor  //takes boardPanel and tileId arguments
+	3) super(new GridBagLayout())
+	4) this.tileId = tileId;
+	5) setPreferredSize(TILE_PANEL_DIMENSION)
+	6) assignTileColor();
+	7) validate();
+	8) create TILE_PANEL_DIMENSION of 10 by 10
+	9) create boardPanel of type BoardPanel
+	10) this.boardPanel = new BoardPanel();
+	11) this.gameFrame.add(this.boardPanel, BoarderLayout.CENTER);
+	12) also this.gameFrame.setLayout(new BorderLayout())
+	13) Create assignTileColor() in TilePanel class
+
+	14) pass this pointer and tile id (value of i in for loop) in tilePanel
+
+	
+	
+
+
+What done till now?
+	a) boardPanel  //maps the chessboard  //visual component
+	b) tilePanel  //maps to tile in chess game 	//visual component
+	c) create 8x8 visual board
+		place tile in each 8x8 places
+	
+
+
+
+Run JChess
+//invisible rn
+
+-----------------------------------------------------------------------------
+Objective see checkerboard
+
+a) boardpanel --> chessboard
+   tilePanel  --> individual tile	
+
+How to implement assignTileColor() ?
+
+
+b) individual Tile panel should know how to draw itself
+	b.1) Create all Columns and Ranks(FIRST_COLUMN and FIRST_RANK) in BoardUtils class	, uses initColumn()
+	b.2) Create all rows in BOardUtils class , uses initRow()
+
+c) In Table.java
+	our algo says:
+		if on 1st,3rd,5th,7th row -> is TileID even or not
+			if tile id even -> color with lightTileColor
+			if tile id not even -> color with dark tile color
+
+		if on 2nd,4th,6th,8th row -> 
+			if tile id even -> color with dark tile color
+			if tile id not even -> color with lightTileColor
+
+
+
+
+Run:
+
+1) See black and white colored tiles , chess board ready
+
+2) See menu bar with Load PGN File
+
+
+d) How can we exit the game?
+
+
+private JMenu createFileMenu() {
+			final JMenu fileMenu = new JMenu("File");
+
+			final JMenuItem openPGN = new JMenuItem("Load PGN File");					//open game from pgn file
+			openPGN.addActionListener(new ActionListener()) {
+				@Override
+				public void actionPerformed(ActionEvent e) {						//opens pgn file when action performed
+					System.out.println("Open up the pgn file");
+				}
+			});
+ 
+			fileMenu.add(openPGN);
+			
+			final JmenuItem exitMenuItem = new JMenuItem("Exit");
+			exitMenuItem.addActionListener(new ActionListener e) {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					System.exit(0);
+				}
+			}); 
+
+			return fileMenu;
+			fileMenu.add(exitMenuItem);
+		}
+
+
+
+Run:
+
+a) see black and white colored tiles
+b) File -> Exit option //can quit the game	

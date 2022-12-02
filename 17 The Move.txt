@@ -1,0 +1,533 @@
+All types of moves in chess
+
+
+a) make whiteStandardLegalMoves and blackStandardLegalMoves as final
+
+   make Board board also final
+
+In king constructor
+	make Alliance pieceAlliance final
+	make int piecePosition final
+	
+
+b) This is important class
+deals with ow to execute a move
+
+	b.1) Non attacking move with Major piece for ex knight
+
+	How to make a move on the board?
+		a) dont mutate existing board
+		b) materialize new board into existence
+		c) move will have reference to incoming board //Board board
+		d) when execute() ->
+			return new board
+
+	b.2) How to materialize new board? use builder
+
+	final Board.Builder builder = new Board.Builder()	;
+
+
+		a) //loop over final Piece piece in this board
+			//no change in pieces where no move
+
+		b) do same for black	
+
+		c) set the piece using setPiece, piece which is moving, we will move using this method
+
+		d) setMoveMaker  : for ex update move maker from black to white
+
+		e) yet ro do: introduce hashcode and equals method on piece or subclasses
+			if this.board.currentPlayer().getActivePieces()
+				if(!this.movedPiece.equals(piece)) {
+					builder.setPiece(piece);
+				}
+			}
+			loop over final Piece piece in this.board.currentPlayer.getOpponent().getActivePieces()
+				for(final Piece piece: this.board.currentPlayer().getOpponent().getAlliance() {
+					builder.setPiece(piece);
+				}
+			builder.setPiece(null);
+			builder.setMoveMaker(this.board.currentPlayer().getOpponent().getAlliance() 
+			
+			return builder.build();
+
+
+	b.3) What is move doing? return new board based on what move
+
+	how to place the piece?
+
+	builder.setPiece(null);
+	
+
+	a) insert method movePiece(Move move);		//What does it do? input move -> apply move on existing piece we are on --> return new piece	with updated position //piece is immutable 
+
+
+		public abstract Piece movePiece(Move move);		//why immutable? caching values + parallelizing workloads
+
+	 a.1) Create getter method getMovedPiece for movedPiece
+			returns this.movedPiece
+
+	b) implement this method on Bishop,King and all other pieces
+
+		//what this does? create new bishop, similar to current bishop but updated
+		@Override
+		public Piece movePiece(Move move) {
+			return new Bishop(move.getMovedPiece().getPieceAlliance(), move.getDestinationCoordinate());
+		}
+	
+		//can also public Bishop movePiece(Move move)  //since in override can be specific
+
+	c) in execute()	//pass all move information into movePiece()
+
+		builder.setPiece(this.movedPiece.movePiece(this));
+
+c) HashCode and equals have to be implemented for pieces
+	Why? everytime interacting with collections -> have to overwrite these methods
+
+	c.1) define equals() in Piece class	//note these are already in reference class
+	
+	c.2) if they are equal referentially (equals and hashCode)		
+
+	c.3) if not instance of piece -> return false	
+
+	c.4) final Piece otherPiece = (Piece)other;
+
+	c.5) return piecePosition
+
+	c.6) do we have to compute hashCode each time? no since object immutable
+			add private final int cachedHashCode;
+
+			add in constructor : this.cachedHashCode = computeHashCode();
+
+	//How will below moves differ? how they print themselves out		
+
+
+		c.7) create method computeHashCode() 
+
+
+
+		private int computeHashCode() {
+			int result = pieceType.hashCode();
+			result = 31 * result + pieceAlliance.hashCode();
+			result = 31 * result + piecePosition;
+			result = 31 * result + (isFirstMove ? 1 : 0);
+			return result;
+		}
+
+		@Override
+		public boolean equals(final Object other) {
+			if(this == other) {
+				return true;
+			}	
+			if!(other instanceOf Piece)) {
+				return false;
+			}
+			final Piece otherPiece = (Piece) other;
+			return piecePosition == otherPiece.getPiecePosition() && pieceType == otherPiece.getPieceType() && pieceAlliance == otherPiece.getPieceAlliance() && isFirstMove == otherPiece.isFirstMove();
+		}
+
+		@Override
+		public boolean hashCode() {
+			 return this.cachedHashCode;
+		
+		}
+
+		c.8) In Move class we have MajorMove and AttackMove
+
+
+		c.9) Create Pawnmove
+			Create constructor PawnMove() extend Move
+			
+			public static final  class PawnMove extends Move {
+				public PawnAttackMove (final Board board,
+								 final Piece movedPiece,
+								 final int destinationCoordinate) {
+				super(board, movedPiece, destinationCoordinate);
+			}		
+		
+			} 
+
+
+		c.10) Create PawnAttackMoveclass and constructor
+
+
+			public static final  class PawnAttackMove extends AttackMove {
+				public PawnAttackMove (final Board board,
+								 final Piece movedPiece,
+								 final int destinationCoordinate,
+								 final Piece attackedPiece) {
+				super(board, movedPiece, destinationCoordinate, attackedPiece);
+			}		
+		
+			} 
+
+		c.11) Create PawnEnPassantAttackMove	
+
+			public static final  class PawnEnPassantAttackMove extends AttackMove {
+				public PawnEnPassantAttackMove (final Board board,
+								 final Piece movedPiece,
+								 final int destinationCoordinate,
+								 final Piece attackedPiece) {
+				super(board, movedPiece, destinationCoordinate, attackedPiece);
+			}		
+		
+			}
+
+		c.12) Ceate PawnEJump	
+
+			public static final  class PawnJump extends Move {
+				public PawnJump (final Board board,
+								 final Piece movedPiece,
+								 final int destinationCoordinate,
+								 final Piece attackedPiece) {
+				super(board, movedPiece, destinationCoordinate, attackedPiece);
+			}		
+		
+			}
+
+		c.13) Create CastleMove	
+
+			public static abstract  class CastleMove extends Move {
+				public CastleMove     (final Board board,
+								 final Piece movedPiece,
+								 final int destinationCoordinate,
+								 final Piece attackedPiece) {
+				super(board, movedPiece, destinationCoordinate, attackedPiece);
+			}		
+			}
+			}
+
+		c.14) Create KingSideCastleMove	
+
+			public static final class KingSideCastleMove extends CastleMove {
+				public KingSideCastleMove  (final Board board,
+								 final Piece movedPiece,
+								 final int destinationCoordinate,
+								 final Piece attackedPiece) {
+				super(board, movedPiece, destinationCoordinate, attackedPiece);
+			}		
+			}
+
+
+		c.15) Create QueenSideCastleMove	
+
+			public static final class QueenSideCastleMove extends CastleMove {
+				public QueenSideCastleMove  (final Board board,
+								 final Piece movedPiece,
+								 final int destinationCoordinate,
+								 final Piece attackedPiece) {
+				super(board, movedPiece, destinationCoordinate, attackedPiece);
+			}		
+			}
+			
+
+	
+		c.16 invalid move
+			public static final class NullMove extends Move {
+				public NullMove	  (final Board board,
+								 final Piece movedPiece,
+								 final int destinationCoordinate,
+								 final Piece attackedPiece) {
+				super(board, movedPiece, destinationCoordinate, attackedPiece);
+			}		
+			}
+			
+
+		c.17) public static class MoveFactory {
+				private MoveFactory() {
+					throw new RunTimeException("Not instantiable");
+				}
+
+				public static Move createMove(final Board board, final int currentCoordinate, final int destinationCoordinate){	//if given board and from and to coordinate -> find move available in board
+					for (final Move move : board.getAllLegalMoves()) {
+						if(move.getCurrentCoordinate == currentCoordinate && move.getDestinationCoordinate == destinationCoordinate) {
+							return move;
+						}
+					}
+				return NULL_MOVE;
+
+		c.18) instantiate: getCurrentCoordinate
+
+			public int getCurrentCoordinate() {
+				return this.getMovedPiece().getPiecePosition();
+			}
+				}
+			}
+		
+}
+			
+
+		c.19) Create
+			public static final Move NULL_MOVE = new NullMove();
+		
+
+
+			public static final class NullMove extends Move {
+				public NullMove() {
+					super(null, null, -1);
+				}
+	
+				@Override
+				public Board execute() {
+					throw new RuntimeException("cannot execute the null move");
+				}
+			}
+
+		c.20) Create getter for getAllLegalMoves
+
+			public Iterable getAllLegalMoves() {
+				return Iterables.unmodifiableIterables.concat(this.whitePlayer.getLegalMoves(), this.blackPlayer.getLegalMoves()));
+			}
+
+
+
+
+WHAT DONE?  Movefactory introduction,  subclasses of moves(yet to be implemented)
+
+IMPLEMENT CASTLE MOVE FOR WHITE PLAYER
+
+d)  How to execute is done, how to generate castle moves?.In king or rook etc class, we didnt write code for castling for ex
+
+
+d.1) add below abstract method in Player.java
+
+protected abstract Collection<Moves> calculateKingCastles(Collection<Moves> playerLegals, Collection<Move> opponentsLegals);
+
+
+d.2) implement same in WhitePlayer
+
+	Write conditions for castle moves
+
+
+d.3) check for attacks in transition tile (future after move tile)
+
+IMPLEMENT CASTLE MOVE FOR WHITE  PLAYER
+
+d.4) 
+	
+
+protected Collection<Moves> calculateKingCastles(Collection<Moves> playerLegals, Collection<Move> opponentsLegals){
+
+	final List<Move> kingCastles = new ArrayList<>();	//why list? 
+
+	if(this.playerKing.isFirstMove() && !this.isInCheck()) {
+		//White king side castle	
+		if(!this.board.getTile(61).isTileOccupied() && !this.board.getTile(62).isTileOccupied()) {		//empty square = 63, 62 should not be occupied
+			final Tile rookTile = this.board.getTile(63);
+			if(rookTile.isTileOccupied() && rookTile.getPiece().isFirstMove()) {
+
+				if(Player.calculatedAttacksOnTile(61, opponentLegalMoves).isEmpty() 
+					&& Player.calculateAttacksOnTile(62, opponentsLegals).isEmpty() 
+					  && rookTile.getPiece()..getPieceType().isRook()) { 				//public abstract boolean isRook() method in Piece.java + add add isRook() {return false} in enums PAWN,KNIGHT... and true in BISHOP
+ 
+			
+
+				//TODO CASTLE MOVE
+				kingCastles.add(null); 
+			
+			}
+		}	
+	}
+}
+		//White Queen side castle	
+		if(!this.board.getTile(59).isTileOccupied() && !this.board.getTile(58).isTileOccupied() && !this.board.getTile(57).isTileOccupied()) {		//empty square = 59,58,57 should not be occupied
+			final Tile rookTile = this.board.getTile(63);
+			if(rookTile.isTileOccupied() && rookTile.getPiece().isFirstMove()) {
+				//TODO CASTLE MOVE
+				kingCastles.add(null); 
+		}	
+	}
+
+		if(!this.board.getTile(59).isTileOccupied() && !this.board.getTile(59).isTileOccupied() && !this.board.getTile(59).isTileOccupied()) {
+			final Tile rookTile = this.boardgetTile(56);
+			if(rook.isTileOccupied() &&  rookTile.getPiece().isFirstMove()) {
+				//TODOCASTLEMOVE
+				kingCastles.add(null);
+			}
+		}
+}
+
+	return ImmutableList.copyOf(kingCastles);
+}
+
+d.5) IMPLEMENT CASTLE MOVE FOR WHITE  PLAYER
+
+protected Collection<Moves> calculateKingCastles(Collection<Moves> playerLegals, Collection<Move> opponentsLegals){
+
+	final List<Move> kingCastles = new ArrayList<>();	//why list? 
+
+	if(this.playerKing.isFirstMove() && !this.isInCheck()) {
+		//White king side castle	
+		if(!this.board.getTile(5).isTileOccupied() && !this.board.getTile(6).isTileOccupied()) {		//empty square = 63, 62 should not be occupied
+			final Tile rookTile = this.board.getTile(7);
+			if(rookTile.isTileOccupied() && rookTile.getPiece().isFirstMove()) {
+
+				if(Player.calculatedAttacksOnTile(5, opponentLegalMoves).isEmpty() 
+					&& Player.calculateAttacksOnTile(6, opponentsLegals).isEmpty() 
+					  && rookTile.getPiece()..getPieceType().isRook()) { 				//public abstract boolean isRook() method in Piece.java + add add isRook() {return false} in enums PAWN,KNIGHT... and true in BISHOP
+
+				//TODO CASTLE MOVE
+				kingCastles.add(null); 
+			
+			}
+		}	
+	}
+}
+		//White Queen side castle	
+		if(!this.board.getTile(1).isTileOccupied() && !this.board.getTile(2).isTileOccupied() && !this.board.getTile(3).isTileOccupied()) {		//empty square = 59,58,57 should not be occupied
+			final Tile rookTile = this.board.getTile(0);
+			if(rookTile.isTileOccupied() && rookTile.getPiece().isFirstMove()) {
+				//TODO CASTLE MOVE
+				kingCastles.add(null); 
+		}	
+	}
+
+		if(!this.board.getTile(59).isTileOccupied() && !this.board.getTile(59).isTileOccupied() && !this.board.getTile(59).isTileOccupied()) {
+			final Tile rookTile = this.boardgetTile(56);
+			if(rook.isTileOccupied() &&  rookTile.getPiece().isFirstMove()) {
+				//TODOCASTLEMOVE
+				kingCastles.add(null);
+			}
+		}
+}
+
+	return ImmutableList.copyOf(kingCastles);
+}
+
+
+d.6) What done? introduced castle move(king side and queen side)
+	what left? no implementation yet
+
+In Move.java in castleMove abstract class
+
+	a)  add protected final  Rook castleRook
+
+	    protected final  int castleRookStart
+		
+	    protected final int castleRookDestination
+ 
+	b) In constructor  this.castleRook = castleROok
+
+	   this.castleRookStart = castleRookstart
+
+	   this.castleRookDestination = castleRookDestination 
+
+
+	e) getter getCastleRook()
+
+	f) isCastlingMove()
+
+	g) check if piece set on new board is not a new piece and not castle rook --> set the piece
+		how to set ? builder.setPiece(piece)
+		move king to destination
+		create new rook manually sitting on castle side		//2 pieces will ove in execute method
+
+		
+
+	h) pass castleRookStart and castleRookDestination in both constructors KingSideCastleMove and QueenSideCastleMove  and in both super()
+
+	i) add toString() for both classes KingSideCastleMove and QueenSideCastleMove
+			public String toString() {
+				return "0-0";
+			}
+			public String toString() {
+				return "0-0-0";
+			}	
+
+
+		public Board execute() {
+			final Builder builder = new Builder();
+			for(final Piece piece: this.board.currentPlayer().getActivePieces()) {
+				if(!this.movedPiece.equals(piece) && !this.castleRook.equals(piece)) {
+					builder.setPiece(piece);
+				}
+
+			}
+			for(final Piece piece : this.board.currentPlayer().getOpponent().getActivePieces()) {
+				builder.setPiece(piece);
+			}
+			builder.setPiece(this.movedPiece.movePiece(this));
+			builder.setPiece(new Rook(this.castleRook.getPieceAlliance(), this.castleRookDestination));
+			builder.setMoveMaker(this.board.currentPlayer(),getOpponent().getAlliance());
+			
+			return builder.build(); 
+		}
+	} 
+
+
+	l) what done? player class: calculated kingCastles as add on for each player
+
+		a) in Player constructor concat castle moves to end of collection
+			
+			this.legalMoves = ImmutableList.copyOf(Iterables.concat(LegalMoves, calculateKingCastles(legalMoves, opponentMoves));		
+	
+			why pass own legal moves, opponent legal moves 
+				and also pass calculateKingCastles() which executes for black and white player
+					if white: uses tiles at bottom 
+					if black :uses tiles at top
+
+
+
+	m) 
+			// have to know attacks by enemy bw squares for castling
+	//below find in between tiles for kingsidecastle
+
+	kingCastles.add(new Move.KingSideCastleMove(this.board, this.playerKing, 62 ,(Rook)rookTile.getPiece(), rookTile.getTileCoordinate(), 59)); 
+			
+	//tile 62, tile 61
+
+
+	n) add getTileCoordinate() {return this.tileCoordinate} in Tile.java
+
+		import KingSideCastleMove
+
+	o) QueenSideCastleMove
+		add 	kingCastles.add(new QueenSideCastleMove(this.board, this.playerKing, 58, (Rook)rookTilegetPiece(), rookTile.getTileCoordinate(), 59));
+
+	p) Do same for black  QueenCastleMove
+		kingCastles.add(new QueenSideCastleMove(this.board, this.playerKing, 6, (Rook)rookTilegetPiece(), rookTile.getTileCoordinate(), 3));
+
+
+
+
+protected Collection<Moves> calculateKingCastles(Collection<Moves> playerLegals, Collection<Move> opponentsLegals){
+
+	final List<Move> kingCastles = new ArrayList<>();	//why list? 
+
+	if(this.playerKing.isFirstMove() && !this.isInCheck()) {
+		//White king side castle	
+		if(!this.board.getTile(5).isTileOccupied() && !this.board.getTile(6).isTileOccupied()) {		//empty square = 63, 62 should not be occupied
+			final Tile rookTile = this.board.getTile(7);
+			if(rookTile.isTileOccupied() && rookTile.getPiece().isFirstMove()) {
+
+				if(Player.calculatedAttacksOnTile(5, opponentLegalMoves).isEmpty() 
+					&& Player.calculateAttacksOnTile(6, opponentsLegals).isEmpty() 
+					  && rookTile.getPiece()..getPieceType().isRook()) { 				//public abstract boolean isRook() method in Piece.java + add add isRook() {return false} in enums PAWN,KNIGHT... and true in BISHOP
+
+				//TODO CASTLE MOVE
+				kingCastles.add(new Move.KingSideCastleMove(this.board, this.playerKing, 62 ,(Rook)rookTile.getPiece(), rookTile.getTileCoordinate(), 59)); 
+			
+			}
+		}	
+	}
+}
+		//White Queen side castle	
+		if(!this.board.getTile(1).isTileOccupied() && !this.board.getTile(2).isTileOccupied() && !this.board.getTile(3).isTileOccupied()) {		//empty square = 59,58,57 should not be occupied
+			final Tile rookTile = this.board.getTile(0);
+			if(rookTile.isTileOccupied() && rookTile.getPiece().isFirstMove()) {
+				//TODO CASTLE MOVE
+				kingCastles.add(new QueenSideCastleMove(this.board, this.playerKing, 58, (Rook)rookTilegetPiece(), rookTile.getTileCoordinate(), 59)); 
+		}	
+	}
+
+		if(!this.board.getTile(59).isTileOccupied() && !this.board.getTile(59).isTileOccupied() && !this.board.getTile(59).isTileOccupied()) {
+			final Tile rookTile = this.boardgetTile(56);
+			if(rook.isTileOccupied() &&  rookTile.getPiece().isFirstMove()) {
+				//TODOCASTLEMOVE
+				kingCastles.add(new QueenSideCastleMove(this.board, this.playerKing, 6, (Rook)rookTilegetPiece(), rookTile.getTileCoordinate(), 5));
+			}
+		}
+}
+
+	return ImmutableList.copyOf(kingCastles);
+}

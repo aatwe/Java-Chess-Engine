@@ -1,0 +1,115 @@
+What we know about pawns?
+
+	a) move 2 step, if first move / piece 
+					(or piece at row 2 or row 8)
+	
+	b) move 1 step
+
+	c) if attackMove -> direction vector different
+		MajorMove  -> direction vector different
+
+	d) en pessant ->
+
+	e) pawn promotion ->
+
+	f) pawn cant move back: large tile id -> moving toward smal tile id
+					  small tile id -> moving toward large tile id
+
+
+
+What rules for pawn?
+		direction vector : 8
+-----------------------------------------------------------------------------
+Pseudo Code:
+
+a) Direction vectors:  CANDIDATE_MOVE_COORDINATE = {8};
+b) Constructor
+
+c) calculateLegalMoves()
+	ArrayList of legalMoves
+	// can we just directly add offset to currentPosition?
+	int candidateDestinationCoordinate = this.piecePosition + currentCandidateOffset;
+	//+8 works for black pawns
+	//how to make it work for white pawns?
+		Use Alliance class to return directionality //make separate classes helps like this
+
+	c.1) add getDirection() method in Alliance class
+		Override that method in WHITE or BLACK
+		
+		we will use: find alliance x find direction then add offset		//for white we apply -8 , black -> 8
+
+	 WHITE{
+		@Override
+		int getDirection() {
+			return -1;
+			}
+		},
+	BLACK{
+		@Override
+		int getDirection() {
+			return 1;
+
+
+		if tile moving forward-> is not occupied
+			add to legalMove class -> pawn move
+		
+	
+-----------------------------------------------------------------------------
+
+import com.chess.engine.Alliance;
+import com.chess.engine.board.Board;
+import com.chess.engine.board.Move;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+
+
+class Pawn extends Piece {
+	
+	private final static int[] CANDIDATE_MOVE_COORDINATE = {8};
+
+	Pawn(int piecePosition, Alliance pieceAlliance) {
+		super(piecePosition, pieceAlliance);
+	}
+
+
+	@Override
+	public Collection<Move> calculateLegalMoves(Board board) {
+
+		final List<Move> legalMoves = new ArrayList<>(); 
+		
+		for(final int currentCandidateOffset: CANDIDATE_MOVE_COORDINATE){
+			int candidateDestinationCoordinate = this.piecePosition + (this.getPieceAlliance().getDirection() + currentCandidateOffset);
+			if(!BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)) {
+				coninue;
+			}	
+
+			if(currentCandidateOffset == 8 && board.getTile(candidateDsetinationCoordinate).isTileOccupied()) {
+				legalMoves.add(new Move.MajorMove(board, this, candidateDestinationCoordinate))
+			}
+		}
+		return legalMoves;
+	}
+
+}
+
+Code 2:
+
+public enum Alliance {
+	WHITE{
+		@Override
+		public int getDirection() {
+			return -1;
+		}
+	},
+	BLACK{
+		@Override
+		public int getDirection() {
+			return 1;
+		}
+	}
+
+	public abstract int getDirection();
+}

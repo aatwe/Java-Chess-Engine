@@ -1,0 +1,16 @@
+plug minimax AI into user interface
+
+human vs human
+human vs computer
+computer vs computer
+
+What done: working rule engine for chess
+		basic GUI using swing
+		simple AI using miniMax and evaluation routine
+
+Options -> setup game: choose from human/computer 
+				 choose search depth: 6
+				-> Ok
+
+
+a.1) 

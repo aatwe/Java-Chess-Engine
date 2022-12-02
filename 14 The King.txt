@@ -1,0 +1,125 @@
+1) Last new piece video //King
+
+2) what logic for king?  
+
+	a) one square every direction
+	
+	b) king cant move where enemy attacking
+	
+	
+
+3) How to execute one square every direction?
+
+ 	-1,-7,-8,-9	//-ve direction
+	+1,+7,+8,+9	//+ve direction
+
+	//edge cases
+	first col,last col
+	
+
+4) declare candidate move coordinate
+
+5) create arrayList of legalMoves
+
+	//declare candidateDestinationCoordinate
+
+6) loop over CANDIDATE_MOVE_COORDINATE using currentCandidateOffset
+
+	6.1) candidateDestinationCoordinate = current piece's position + current offset
+
+	6.2) if valid tileCoordinate
+			get the tile and store 	//board.getTile(candidateDestinationCoordinate)
+			
+
+	6.3.2) Check edge cases
+			a) copy FirstColumn_Exclusion and Eighth_Column_exclusion from knight
+			
+			b) What excusions?
+				b.1) if king on 1st col  -> movecoordinate = -9 , -1 or 7
+				b.2) if king on 8th col  -> movecoordinate = -7 ,  1 or 9
+
+			c) what exception case? ifFirstcolExclusion()  OR isEighthColumnExclusion()
+
+			if(isFirstColumnExclusion(this.piecePosition, currentCandidateOffset) || isEighthColumnExclusion(this.piecePosition, currentCandidateOffset)) {
+				continue;
+			}
+
+
+	6.3) Check if square is occupied	similar to knight and other pieces
+
+		  final Tile candidateDestinationTile = board.getTile(candidateDestinationCoordinate);
+		   if(!candidateDestinationTile.isTileOCcupied()) {
+				legalMoves.add(new Move());
+			} else {
+			final Piece pieceAtDestination = candidateDestinationTile.getPiece();
+			final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
+
+			if(this.pieceAlliance != pieceAlliance) {
+				legalMoves.add(new Move());
+			  }
+		    }
+		//Looping over each candidate_MOve_Coordinate to check if tile at that coordinate is occupied or not
+		It will determine what move to create
+
+
+
+//return immutable List of copy of legalmoves
+
+
+Code:
+King.java
+
+
+public class King extends Piece {
+
+	private final static int[] CANDIDATE_MOVE_COORDINATE = {-9, -8 ,-7 ,-1, 1, 7, 8, 9};
+
+	King(int piecePosition, Alliance pieceAlliance){
+	  super(piecePosition, pieceAlliance);
+	}
+	@Override
+	public Collection<Move> calculateLegalMoves(Board board) {
+		final List<Move> legalMoves = new ArrayList<>();
+	
+		int candidateDestinationCoordinate;
+
+		for(final int currentCandidateOffset : CANDIDATE_MOVE_COORDINATE) {
+			 
+			final int candidateDestinationCoordinate = this.piecePosition + currentCandidateOffset;
+	
+			if(isFirstColumnExclusion(this.piecePosition, currentCandidateOffset) || isEighthColumnExclusion(this.piecePosition, currentCandidateOffset)) {
+				continue;
+			}
+
+			if(BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)) {
+				final Tile candidateDestinationTile = board.getTile(candidateDestinationcoordinate);
+				
+				final Tile candidateDestinationTile = board.getTile(candidateDestinationCoordinate);
+		   			if(!candidateDestinationTile.isTileOCcupied()) {
+					legalMoves.add(new Move());
+						} else {
+					final Piece pieceAtDestination = candidateDestinationTile.getPiece();
+					final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
+
+					if(this.pieceAlliance != pieceAlliance) {
+						legalMoves.add(new Move.AttackMove(board, this, candidateDestinationCoordinate, pieceAtDestination));
+			 	 	}
+		    		}
+			}
+			
+		}
+
+		return ImmutableList.copyOf(legalMoves);
+	}
+	
+	private static boolean isFirstColumnExclusion(final int currentPosition, final int candidatePosition) {
+		return BoardUtils.FIRST_COLUMN[currentPosition] && ((candidateOffSet == -9) || (candidateOffSet == -1) || candidateOffSet == 7); 
+		}
+
+	private static boolean isEighthColumnExclusion(final int currentPosition, final int candidateOffset) {
+		return BoardUtils.EIGHTH_COLUMN[currentPosition] && ((candidateOffSet == -7) || (candidateOffSet == 1) ||  (candidateOffSet == 9); 
+		}
+
+
+
+}

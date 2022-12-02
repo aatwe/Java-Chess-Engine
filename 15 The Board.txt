@@ -1,0 +1,671 @@
+Objective: Create board with pieces on it
+
+a) Create board class
+
+b) Create getTile method of type Tile
+	takesinput tileCoordinate
+
+c) Create Board constructor
+
+d) create builder class		//this will create an immutable build based on builder
+
+	d.1) How to track each tile on board?
+		Create a map of Integers //each tile has an id
+		//map a tile id of a chessboard to given piece on tile id
+
+	d.2) how to track person to move
+		Alliance type var nextMovemaker
+
+
+e) declare getPiecePosition method in Piece class
+
+--------Now we have a way to build chessboard------------------
+
+f) What member fields to introduce 	in board class?
+	f.1) collection of tiles
+	f.2) use an array 0-63
+
+
+g) Create a list //why not array? cant have immutable array in java	 
+	can have immutable list
+
+h) Create Board constructor that takes builder object as argument
+	creates game board using createGameBoard()
+						takes builder object
+
+i) write method createGameBoard()	//takes builder object
+	
+	i.1) Create an array of 64 tiles
+
+	
+	public static List<Tile> createGameBoard(final Builder builder) {
+
+	i.2) How is board created?
+
+		how is piece mapped to tile? boardConfig
+		What createTile() will do?
+			we call setPiece on builder
+			if we build at king at 4
+			
+				in for loop we get piece associated with tile id 4 and create tile from it	
+
+
+		
+
+		final Tile[] tile = new Tile(BoardUtils.MM_TILES);
+		for(int i = 0; i< BoardUtils.NUM_TILES; i++){
+			tiles[i] = Tile.createTile(i, builder.boardConfig.get(i));
+		}
+		return ImmutableList.copyOf(tiles);
+	}
+
+
+
+
+j) create method Board createStandardBoard()
+
+	what will this do? create intiial position for chessboard	
+
+		how? uses builder class too create standardChessboard
+	j.1) call constructor for each piece
+			make constructor public + import
+			swtich pieceAlliance and piecePosition order in each	
+	
+	j.2) 
+
+
+	builder.setPiece(new Rook(Alliance.BLACK, 0));
+	builder.setPiece(new Knight(Alliance.BLACK, 1));
+	builder.setPiece(new Bishop(Alliance.BLACK, 2));
+	builder.setPiece(new Queen(Alliance.BLACK, 3));
+	builder.setPiece(new King(Alliance.BLACK, 4));
+	builder.setPiece(new Bishop(Alliance.BLACK, 5));
+	builder.setPiece(new Knight(Alliance.BLACK, 6));
+	builder.setPiece(new Rook(Alliance.BLACK, 7));
+	builder.setPiece(new Pawn(Alliance.BLACK, 8));
+	builder.setPiece(new Pawn(Alliance.BLACK, 9));
+	builder.setPiece(new Pawn(Alliance.BLACK, 10));
+	builder.setPiece(new Pawn(Alliance.BLACK, 11));
+	builder.setPiece(new Pawn(Alliance.BLACK, 12));
+	builder.setPiece(new Pawn(Alliance.BLACK, 13));
+	builder.setPiece(new Pawn(Alliance.BLACK, 14));
+	builder.setPiece(new Pawn(Alliance.BLACK, 15));
+	
+
+	builder.setPiece(new Rook(Alliance.WHITE, 0));
+	builder.setPiece(new Knight(Alliance.WHITE, 1));
+	builder.setPiece(new Bishop(Alliance.WHITE, 2));
+	builder.setPiece(new Queen(Alliance.WHITE, 3));
+	builder.setPiece(new King(Alliance.WHITE, 4));
+	builder.setPiece(new Bishop(Alliance.WHITE, 5));
+	builder.setPiece(new Knight(Alliance.WHITE, 6));
+	builder.setPiece(new Rook(Alliance.WHITE, 7));
+	builder.setPiece(new Pawn(Alliance.WHITE, 8));
+	builder.setPiece(new Pawn(Alliance.WHITE, 9));
+	builder.setPiece(new Pawn(Alliance.WHITE, 10));
+	builder.setPiece(new Pawn(Alliance.WHITE, 11));
+	builder.setPiece(new Pawn(Alliance.WHITE, 12));
+	builder.setPiece(new Pawn(Alliance.WHITE, 13));
+	builder.setPiece(new Pawn(Alliance.WHITE, 14));
+	builder.setPiece(new Pawn(Alliance.WHITE, 15));
+
+
+	j.3) when we callbuilder.boardConfig.get(i)
+		if no piece associated returns null --> jump to Tile.java OccupiedTileCoordinate -> EMPTY_TILES_CACHE
+
+
+	j.4) 	return gameBoard.get(tileCoordinate)
+
+	
+	j.5) What did we capture? tiles
+		How to capture white and black pieces?
+		
+	j.6) 	private Collection<Piece> calculateActivePieces(List<Tile> gameBoard, Alliance white) {
+	
+		}
+		//What will this do? return collection of pieces 
+			takes input: List<Tile> gameBoard
+					  final Alliance alliance
+	
+	j,.7) Create 
+		public Builder setMoveMaker(final Alliance nextMoveMaker){
+			this.nextMoveMaker = nextMoveMaker;
+			return this;		
+		}
+		//What is happening here? resetting property current Builder , returning the builder back from where called
+
+	j.8 Expose getPiecePosition in Piece class
+
+----------What achieved? have a way to build chessboard------------
+what done?
+	1) set the pieces as per intial position of board
+	2) set the movemaker which tracks which peice to play to white	
+	3) build a board
+	4) 2 member fields:
+		whitePieces
+		blackPieces
+	5) how to c alculate leagal moves for white and black?
+
+
+k) Objective: 
+	k.1) Calculate legal moves
+		
+		1) declare local variables final Collection<Move> whitestandardLegalMoves = calculateLegalMoves(this.whitePieces);
+
+		2) declare local variables final Collection<Move> blackstandardLegalMoves = calculateLegalMoves(this.blackPieces);
+		
+		3) create method calculateLegalMoves	//takes input: collection of  pieces
+
+			3.1) how to track legal moves separately? create list of Move called legalMoves = new ArrayList<>();
+
+			3.2) loop over pieces
+				while looping calculate legal moves for every piece using piece.calculateLegalMoves(this);		//returns collection 
+					and add it to legalMoves List
+
+			3.3) return the list
+		 
+			//why we created whitestandardLegalMoves and blackstandardLegalMoves	//flush out white player and black player
+
+
+	k.2) Print the board using toString()
+		k.2.1( Create prettyPrint method
+
+		//What this does? Prints white piece differently from black
+		//how will it print? ASCII text 
+
+
+
+		@Override
+		public String toString() {
+			final StringBuilder builder = new StringBuilder();
+			for(int i=0; i< BoardUtils.NUM_TILES; i++) {
+				final String tileText = prettyPrint(this.gameBoard.get(i));
+				builder.append(String.format(%3s", tileText));
+				if(i+1)% BoardUtils.NUM_TILES_PER_ROW == 0) {
+					builder.append("\n");
+				}
+			}
+			return builder.toString();
+		}
+
+		private static String prettyPrint(final Tile tile){
+			if(tile.isOccupied()){
+				return tile.getPiece().getPieceAlliance().isBlack() ? tile.toString().toLowerCase();
+					tile.toString();
+			}
+			return tile.toString();
+		}
+
+		k.2.2) //Note: add toString() to tile class
+	//Occupied Tile
+		@Override
+		public  String toString() {
+			return this.pieceOnTile.toString();
+		}
+	//Empty tile
+		@Override
+		public  String toString() {
+			return "-";
+		}
+
+	k.3) the value that we returnin pretty print	
+		tile.getPiece().getPieceAlliance().isBlack() ? tile.toString().toLowerCase();
+					tile.toString();
+	
+		Paste it in tile class toString() method for occupied tile
+		Looks like below:
+		@Override
+		public  String toString() {
+			return getPiece().getPieceAlliance().isBlack() ? getPiece().toString().toLowerCase():
+				getPiece().toString();
+
+
+		}
+
+	k.4 to shorten code:
+	we remove prettyPrint()
+	and instead of 	final String tileText = prettyPrint(this.gameBoard.get(i));
+use	
+	final String tileText = this.gameBoard	.get(i).toString();
+
+
+	k.4) no toString() on each individual piece
+
+	How to add toString on each piece?
+
+		1) introduce enum on each piece class, it has lot more than toString()
+
+		public enum PieceType {
+	
+			Pawn("P"), 
+			KNIGHT(N"),
+			BISHOP("B"),
+			ROOK("R"),
+			QUEEN("Q"),
+			KING("K");
+
+			private String pieceName;
+			
+			PieceType(final String pieceName) {
+				this.pieceName = pieceName;
+			}
+		@Override 
+		public String toString() {
+			return this.pieceName;
+		}
+
+		}
+		2) Invoke toString() on each piece
+			How? 
+		2.1) for ex in Bishop class
+				@Override 
+				public String toString() {
+					return PieceType.BISHOP.toString();		//earlier it was return PieceType.toString();
+				}
+			//add this method in all : Bishop,KING, Knight,Pawn,Queen,Rook
+
+			
+---------TESTING TIME----------------------------------------------------------
+How will we test?
+
+Note: dont forget to initialize
+
+public Builder() {
+			this.boardConfig = new HashMap<>();
+		}
+
+Note: dont forget to initailize
+	SECOND_ROW	 = null;  --> SECOND_ROW	 = initRow(8);
+	SEVENTH_ROW = null;  --> SEVENTH_ROW	 = initRow(48);		//this 48 is tile id begins the row
+
+
+Also  in BoardUtils.java
+private static boolean[] initRow(int rowNumber) {
+		final boolean[] row = new boolean[NUM_TILES];
+		do {
+			row[rowNumber] = true;
+			rowNumber++;
+
+		} while (rowNumber % NUM_TILES_PER_ROW != 0);
+		return row;
+	}
+
+
+
+//starts at 0, while current no. < 8 --> will set all values to true -> while condition will break 
+
+
+ --
+a) create new class JChess
+	public class JChess {
+		public static void main(String[] args) {
+			Board board = Board.createStandardBoard();
+
+			System.out.println(board);
+		}
+	}	
+
+R N B Q K B N R
+P P P P P P P P
+- - - - - - - -
+- - - - - - - -
+- - - - - - - -
+- - - - - - - -
+P P P P P P P P
+R N B Q K B N R
+	
+
+-----------------------------------------------------------------------------------------------------------------
+	
+Board.java
+
+
+public class Board {
+
+	private final List<Tile> gameBoard;
+	private final Collection<Piece> whitePieces;
+	private final Collection<Piece> blackPieces;
+
+	private  Board(Builder builder) {
+		this.	gameBoard = createGameBoard(builder);
+		this.whitePieces = calculateActivePieces(this.gameBoard, Alliance.WHITE);
+		this.blackPieces = calculateActivePieces(this.gameBoard, Alliance.BLACK);
+
+		final Collection<Move> whitestandardLegalMoves = calculateLegalMoves(this.whitePieces);
+		final Collection<Move> whitestandardLegalMoves = calculateLegalMoves(this.blackPieces);
+	
+	}
+
+			@Override
+		public String toString() {
+			final StringBuilder builder = new StringBuilder();
+			for(int i=0; i< BoardUtils.NUM_TILES; i++) {
+				final String tileText = this.gameBoard	.get(i).toString();
+				builder.append(String.format(%3s", tileText));
+				if(i+1)% BoardUtils.NUM_TILES_PER_ROW == 0) {
+					builder.append("\n");
+				}
+			}
+			return builder.toString();
+		}
+
+
+
+	private Collection<Move> calculateLegalMoves(final  Collection<Piece> Pieces) {
+		
+		final List<Move> legalMoves = new ArrayList<>();
+
+		for(final Piece piece: pieces) {
+			legalMoves.addAll(piece.calculateLegalMoves(this));
+		}
+		
+		return ImmutableList.copyOf(legalMoves);
+
+
+	public Tile getTile(final int tileCoordinate) {
+		return gameBoard.get(tileCoordinate)
+	}
+	
+	private static Collection<Piece> calculateActivePiecesfinal (List<Tile> gameBoard, Alliance white ) {
+		
+		final List<Piece> activePieces = new ArrayList<>();
+
+		for(final Tile tile : gameBoard){
+			if(tile.isTileOccupied()) {
+				final Piece piece = tile.getPiece();
+				if(piece.getAlliance() == alliance) {
+					activePieces.add(piece);
+				}
+			}
+		}
+	
+		return ImmutableList.copyOf
+	}
+
+
+	public static List<Tile> createGameBoard(final Builder builder) {
+		final Tile[] tile = new Tile(BoardUtils.MM_TILES);
+		for(int i = 0; i< BoardUtils.NUM_TILES; i++){
+			tiles[i] = Tile.createTile(i, builder.boardConfig.get(i));
+		}
+		return ImmutableList.copyOf(tiles);
+	}
+
+	public static Board createStandardBoard() {
+		final Builder builder = new Builder();
+	
+	builder.setPiece(new Rook(Alliance.BLACK, 0));
+	builder.setPiece(new Knight(Alliance.BLACK, 1));
+	builder.setPiece(new Bishop(Alliance.BLACK, 2));
+	builder.setPiece(new Queen(Alliance.BLACK, 3));
+	builder.setPiece(new King(Alliance.BLACK, 4));
+	builder.setPiece(new Bishop(Alliance.BLACK, 5));
+	builder.setPiece(new Knight(Alliance.BLACK, 6));
+	builder.setPiece(new Rook(Alliance.BLACK, 7));
+	builder.setPiece(new Pawn(Alliance.BLACK, 8));
+	builder.setPiece(new Pawn(Alliance.BLACK, 9));
+	builder.setPiece(new Pawn(Alliance.BLACK, 10));
+	builder.setPiece(new Pawn(Alliance.BLACK, 11));
+	builder.setPiece(new Pawn(Alliance.BLACK, 12));
+	builder.setPiece(new Pawn(Alliance.BLACK, 13));
+	builder.setPiece(new Pawn(Alliance.BLACK, 14));
+	builder.setPiece(new Pawn(Alliance.BLACK, 15));
+	
+
+	builder.setPiece(new Rook(Alliance.WHITE, 0));
+	builder.setPiece(new Knight(Alliance.WHITE, 1));
+	builder.setPiece(new Bishop(Alliance.WHITE, 2));
+	builder.setPiece(new Queen(Alliance.WHITE, 3));
+	builder.setPiece(new King(Alliance.WHITE, 4));
+	builder.setPiece(new Bishop(Alliance.WHITE, 5));
+	builder.setPiece(new Knight(Alliance.WHITE, 6));
+	builder.setPiece(new Rook(Alliance.WHITE, 7));
+	builder.setPiece(new Pawn(Alliance.WHITE, 8));
+	builder.setPiece(new Pawn(Alliance.WHITE, 9));
+	builder.setPiece(new Pawn(Alliance.WHITE, 10));
+	builder.setPiece(new Pawn(Alliance.WHITE, 11));
+	builder.setPiece(new Pawn(Alliance.WHITE, 12));
+	builder.setPiece(new Pawn(Alliance.WHITE, 13));
+	builder.setPiece(new Pawn(Alliance.WHITE, 14));
+	builder.setPiece(new Pawn(Alliance.WHITE, 15));
+
+	builder.setMoveMaker(Alliance.WHITE);
+	
+	return builder.build();
+
+	}
+
+
+	public static class Builder {
+		Map<Integer, Piece> boardConfig;
+		Alliance nextMoveMaker;
+
+		public Builder() {
+			this.boardConfig = new HashMap<>();
+		}
+		
+		public Builder setPiece(final Piece piece){
+			this.boardConfig.put(piece.getPiecePosition(), piece);
+			return this;
+		}		
+		
+
+		public Builder setMoveMaker(final Alliance nextMoveMaker){
+			this.nextMoveMaker = nextMoveMaker;
+			return this;
+		}
+
+		public Board build() {
+			return new Board(this);
+		}
+	}
+}
+
+
+____________________________________________________________________________________________________________________
+
+	
+public abstract class Piece {
+
+	protected final int  piecePostion;
+	protected final Alliance pieceAlliance;
+	protected final boolean isFirstMove;
+
+	Piece(final int PiecePosition, final, Alliance pieceAlliance) {
+		this.pieceAlliance = pieceAlliance;
+		this.piecePosition = piecePosition;
+		this.isFirstMove = false;
+	
+	}
+
+	public int getPiecePosition() {
+		return this.piecePosition;
+	}
+
+	public Alliance getPieceAlliance() {
+		return this.pieceAlliance;
+	}
+
+	public boolean isFirstMove() {
+		return this.isFirstMove;
+	}
+
+	public abstract Collection <Move> calculateLegalMoves(final Board board);	//this could have been unspecified => refactor -> change signature // List<Move> -> Collection<Move>
+
+	
+		public enum PieceType {
+	
+			Pawn("P"), 
+			KNIGHT(N"),
+			BISHOP("B"),
+			ROOK("R"),
+			QUEEN("Q"),
+			KING("K");
+
+			private String pieceName;
+			
+			PieceType(final String pieceName) {
+				this.pieceName = pieceName;
+			}
+		@Override 
+		public String toString() {
+			return this.pieceName;
+		}
+
+		}
+		
+
+}	
+____________________________________________________________________________________________________________________
+
+Code1 :
+
+public abstract class Tile {
+
+
+	int tileCoordinate;
+
+	Tile(int tileCoordinate) {
+		this.tileCoordinate = tileCoordinate;
+	}
+
+
+	public abstract boolean isTileOccupied();
+
+	public abstract Piece getPiece();
+
+	public static final class EmptyTile extend Tile{
+		
+		EmptyTile(int coordinate)
+			super(coordinate);
+	  	}
+
+		@Override
+		public  String toString() {
+			return "-";
+		}
+
+		@Override
+		public boolean isTileOccupied() {
+			return false;
+		}
+		@Override
+		public Piece getPiece() {
+			return null;
+		}
+
+	}
+	public static final class OccupiedTile extends Tile{
+		
+		Piece pieceOnTile;
+
+		OccupiedTile(int tileCoordinate, Piece pieceOnTile) {
+			super(tileCoordinate);
+			this.pieceOnTile = pieceOnTile
+		}
+
+		OccupiedTile(int coordinate)
+			super(coordinate);
+	  	}
+
+		@Override
+		public  String toString() {
+			return getPiece().getPieceAlliance().isBlack() ? getPiece().toString().toLowerCase():
+				getPiece().toString();
+
+		}
+
+		@Override
+		public boolean isTileOccupied() {
+			return true;
+		}
+		@Override
+		public Piece getPiece() {
+			return this.pieceOnTile;
+		}
+
+	}
+
+
+
+}
+
+---------------------------------------------------------
+JChess.java
+
+create new class JChess
+	public class JChess {
+		public static void main(String[] args) {
+			Board board = Board.createStandardBoard();
+
+			System.out.println(board);
+		}
+	}	
+
+
+WHAT OUTPUT WE SEE??!!
+
+r  n  b  q  k  b  n  r
+p  p  p  p  p  p  p  p 
+-  -  -  -  -  -  -  - 
+-  -  -  -  -  -  -  - 
+-  -  -  -  -  -  -  - 
+-  -  -  -  -  -  -  - 
+p  p  p  p  p  p  p  p 
+R  N  B  Q  K  B  N  R
+
+
+What achieved?
+a) white pieces oriented at bottom
+b) black picees oriented at top
+
+
+____________________________________________________________________________________________________________________
+
+BoardUtils.java
+
+public class BoardUtils {
+	public static final boolean[] FIRST_COLUMN = initColumn(0);
+	public static final boolean[] SECOND_COLUMN = initColumn(1);
+	public static final boolean[] SEVENTH_COLUMN = initColumn(6);	
+	public static final boolean[] EIGHTH_COLUMN = initColumn(7);
+
+	public static final boolean[] SECOND_ROW = null;
+	public static final boolean[] SEVENTH_ROW = null;
+
+	public static final int NUM_TILES = 64
+	public static final int NUM_TILES_PER_ROW = 64
+
+	private BoardUtils() {
+		throw new RuntimeException("You cannot instantiate me");
+	}
+
+
+	private static boolean initColumn(columnNumber) {
+		final boolean[] column = new boolean[NUM_TILES];
+
+		do {
+			column[columnNumber] = true;
+			columnNumber += NUM_TILES_PER_ROW;
+		} while(columnNumber < NUM_TILES);
+		return column; 
+
+	private static boolean[] initRow(int rowNumber) {
+		final boolean[] row = new boolean[NUM_TILES];
+		do {
+			row[rowNumber] = true;
+			rowNumber++;
+
+		} while (rowNumber % NUM_TILES_PER_ROW != 0);
+		return row;
+	}
+
+	public static boolean isValidTileCoordinate(final int coordinate) {
+		return coordinate >=0 && coordinate < NUM_TILES;
+	}
+ 
+	}
+	
+	
+}
+

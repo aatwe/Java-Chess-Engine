@@ -1,0 +1,212 @@
+Objective : Minimax
+What is minimax? decision rule used in decision thoery , game theory, statistics 
+	and philosophy
+
+What achieves? minimizes possible loss from worst case max loss
+used for 2 player zero sum game theory 
+(alternate + simutaneous move)
+
+extended for more complex games and general decision making
+
+ai: decision what move to select
+
+-------------------------------------------------------------------------
+
+Why chess is zero sum? win for one, is loss for other
+
+	
+4 layers of moves
+
+top layer : white player turn
+next layer : black player turn
+...
+2 full moves; w,b,w,b
+
+		     -7
+		/		\
+	-10			-7
+    /		\	  /		\
+  10      -10	 5 		-7
+/    \	|	/ \ 		 |
+10   5    -10   5  -inf	-7
+/ \	  \ 	    / \	\    /  \
+10 +inf  5	   7  5  -inf  -7  -5
+	
+
+
+How minimax makes decision here?	
+
+a) acknowledge truths
+	a.1) too many moves and boards to enumerate all possiblities
+			//cant make first winning move in chess
+			  can do in small games
+				tic tac toe 
+
+	a.2) stop after 4 moves
+
+	a.3) evaluate the boards
+			find who is winning (how evaluate board ?heuristic)
+			function will analyse board and output who is winning
+
+	//go to a fixed depth -> evaluate using evaluation ()	
+	//what this function will do? will score the board and find who is winning
+
+	a.4) use the score so that which player makes first move wins
+
+
+		apply minimize rule in layer 4
+		apply maximize rule in layer 3
+		apply minimize rule in layer 2
+		apply minimize rule in layer 1
+
+			
+
+	a.5) conclude first move should be -7
+
+
+
+b) create ai package
+	create java class MoveStrategy of type interface
+	What will this do? what we want moveEngine to conform to?
+	 we will have many move strategies, this will be interface
+	 
+	b.1) Move execute(Board board, int depth) {
+
+		}
+
+
+	b.2) create MiniMax class implements MoveStrategy
+				
+
+		@Override
+		public Move execute(Board board, int depth) {
+			return null;
+		}
+
+	b.3) Create MoveStrategy.java interface
+			
+		public interface MoveStrategy {
+		
+			Move execute(Board board, int depth);
+		}	
+
+	b.4) Create MiniMax class which will implement MoveStrategy and execute method
+	
+		public class MinioMax implements MoveStrategy {
+			@Override 
+			Move execute(Board board, int depth) {
+				return null;
+			}
+		}
+	
+	b.5) AI will invoke execute method  on board for given depth
+		
+
+	b.6) calculate best move using minimax algo
+
+
+
+c) Evaluation function	//What will this do? score the board
+
+ What types of evaluate functions?
+	a) check who has more pieces
+	b) check who has more legal moves
+	c) check pawn structure
+	d) check and checkmate
+	e) check castle possibility
+	f) 
+
+
+a.1) Create BoardEvaluation interface
+	What does it return? integer
+
+if no. more positive : white winning
+if no. more negative : black winning
+
+	public interface BoardEvaluator {
+
+		int evaluate(Board board, int depth);
+ 
+	}
+
+a.2) In MiniMax.java
+
+	a.2.1) create BoardEvaluator boardEvaluator;
+	a.2.2) constructor MiniMax()
+			this.boardEvaluator = null;
+
+	a.2.3) Override toString()
+			return "MiniMax"
+
+	a.2.4) initially scores 0
+		 make moves
+		score boards using evaluation function
+		propogate score back up to top (return min/max alternatively up)
+
+		
+	a.2.5) see diagram
+		  when minimizing, 2 possible moves, 
+		  make each move
+		  create var with highest possible value
+		  check if current value < lowest seen value
+			set lowest seen value as current value
+
+		for ex
+				5
+			    /  \
+			   7    5
+
+			lowest seen value = 7
+		next iteration
+			lowest seen value = 5
+	
+		Output; we know the lowest value at that level
+		return that value
+
+	a.2.5.1) min calls max-> max calls min //corecursive
+			//This is how recursion works
+	
+	a.2.6) for max()
+		we have highestSeen value
+
+	a.2.7) 	
+		if(currentValue >= highestSeenValue) {
+			return highestSeenValue = currentValue;
+		}
+		return highestSeenValue
+
+	
+
+
+MiniMax inplelents MoveStrategy (
+private final BoardEvaluator boardEvaluator;
+public MiniMax() (
+this.boardlvaluator = null;
+)
+
+@Override
+public String toStringl) {
+return "MiniMax";
+)
+@Override
+public Move execute(Board board, int depth) {
+return null;
+}
+
+public int min(final Board board,
+			 final int depth) {
+ if(depth == 0) {
+	return this.boardEvaluator.evaluate(board, depth);
+	}
+
+  int lowestSeenValue = Integer.MAX_VALUE;
+  for(final Move move : board.currentPlayer().getLegalMoves()) {
+	final MoveTransition moveTransition = board.currentPlayer().makeMove(move);
+	if(moveTransition.getMoveStatus().isDone())	{
+		final int currentValue  =max(moveTranisiton.getTransitionBoard(), depth -1);
+		if(currentValue <= lowest) {
+			return lowestSeenValue = currentValue;
+		}
+	}
+ }
+}

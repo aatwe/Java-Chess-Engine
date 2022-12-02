@@ -1,0 +1,82 @@
+a)	 min calls max
+	 max calls min 
+   
+
+
+public int min(final Board board,
+final int depth) {
+if(depth == 0 /*|[ game over*/) {
+return this.boardEvaluator.evaluate(board, depth);
+}
+int lowestSeenValue = Integer.MAX_VALUE;
+for(final Move move : board.currentPlayer().getLegalMoves()) {
+final MoveTransition moveTransition = board.currentPlayer().makeMove(move);
+if(moveTransition.getMoveStatus().isDone()) {
+final int currentValue = max(moveTransition.getTransitionBoard(), depth — 1);
+if(currentValue <= lowestSeenValue) {
+lowestSeenValue = currentValue;
+}
+}
+}
+return lowestSeenValue;
+}
+
+
+
+
+public int max(final Board board,
+final int depth) {
+if(depth == 0 /*|| game over*/) {
+return this.boardEvaluator.evaluate(board, depth);
+}
+int highestSeenValue = Integer.MIN_MALUE;
+for(final Move move : board.currentPlayer().getLegalMoves()) {
+final MoveTransition moveTransition = board.currentPlayer().makeMove(move);
+if(moveTransition.getMoveStatus().isDone()) {
+final int currentValue = min(moveTransition.getTransitionBoard(), depth — 1);
+if(currentValue >= highestSeenValue) {
+highestSeenValue = currentValue;
+}
+}
+}
+return highestSeenValue;
+
+
+
+
+b) depth variable will determine when to stop the process
+
+c) stop after 8-10 plies , then propogate scores up the tree
+
+d)  In MinMax.java execute()
+
+  d.1) log start time
+
+  d.2) declare bestMove variable
+
+  d.3) declare highestSeenvalue variablw = MIN_VALUE
+
+  d.4) declare lowestSeenValue = Integer.MAX_VALUE
+
+  d.5) declare currentValue variable
+
+  d.6) print out which current player thinking with what depth
+
+  d.7) declare int numMoves
+		stores what? how many legal moves current player has
+
+  d.8) loop over current Player's found legal moves
+		how to simulate a move
+		store current player's makeMove in movetransition variable of type MoveTransition
+		if moveTransition's status is done i.e move wwas successfully made
+
+			currentValue = 
+				In original board if currentplayer alliance is white -> next move min() pass transitionBoard from moveTransition and what depth
+					else if black -> max()
+		
+			//note how the to transitionboard is passed for starting point of further recursion calls		  
+
+	final long startTime = System.currentTimeMillis();
+
+	   
+

@@ -1,0 +1,254 @@
+Objective: pawn jump move
+
+How to implement pawn jump? pawn from d2 to d4
+what condition? d2 and d3 are not occupied
+
+Once move made, exhaust the move 
+for both black and white pieces
+
+
+
+
+
+Changes:
+1) Pawn(final...)
+
+2) 
+	2.1) Check if candidateOffset is 16
+
+	Why adding candidate offset 16?
+	CANDIDATE_MOVE_COORDINATE = {8, 16};
+
+	2.2) Check if first move
+
+	..if all above condition is met
+
+3) add final boolean isFirstMove() in Piece class	
+
+4) add final variable of type boolean : isFirstMove;
+	initialize in constructor to false;
+
+   crate another method isFirstMove()	
+	returns what  this.isFirstMove
+
+5) If white check if pawn on below row,
+   If black check if pawn on above row
+
+	how will we check?
+	a) intiialize rows in BoardUtils.java 
+
+6) boardUtils:
+	Add SECOND_ROW in board_utils //set to null for now
+	Add SEVENTH_ROW
+
+7) In Piece.java
+	Check if on second row && Check if black
+	Check if on seventh row && Check if white 
+
+	a) add condition BoardUtils.SECOND_ROW(this.piecePosition)
+	b) add codnition this.getPieceAlliance().isBlack()
+
+
+	//Create above methods in alliance.java
+In black enum
+		@Override
+		public int isWhite() {
+			return false;
+		}
+		@Override
+		public int isBlack() {
+			return true;
+		}
+
+
+In white			
+		 @Override
+		public int isWhite() {
+			return true;
+		}
+		@Override
+		public int isBlack() {
+			return false;
+		}
+
+8) Condition check if square behind estination is not occupied	for ex e3  not occupied for e2 pawn	
+
+	a) if all above else if conditions are true
+		int_behindCandidateDestinationCoordinate = current position + get direction 
+
+
+	b) Check if behind candidiate not occupied and destination candidate not occupied
+			add move into legal moves
+
+
+
+9) we kept space for promotion
+--Done--
+___________________________________________________________________________________________________________________________________________
+
+
+
+
+import com.chess.engine.Alliance;
+import com.chess.engine.board.Board;
+import com.chess.engine.board.BoardUtils;
+import com.chess.engine.board.Move;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import static com.chess.engine.board.Move;
+
+
+
+class Pawn extends Piece {
+	
+	private final static int[] CANDIDATE_MOVE_COORDINATE = {8, 16};
+
+	Pawn(final int piecePosition, final Alliance pieceAlliance) {
+		super(piecePosition, pieceAlliance);
+	}
+
+
+	@Override
+	public Collection<Move> calculateLegalMoves(final Board board) {
+
+		final List<Move> legalMoves = new ArrayList<>(); 
+		
+		for(final int currentCandidateOffset: CANDIDATE_MOVE_COORDINATE){
+			final int candidateDestinationCoordinate = this.piecePosition + (this.getPieceAlliance().getDirection() + currentCandidateOffset);
+			if(!BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)) {
+				coninue;
+			}	
+
+			if(currentCandidateOffset == 8 && board.getTile(candidateDsetinationCoordinate).isTileOccupied()) {
+				//deal with promotions here later
+
+				legalMoves.add(new Move.MajorMove(board, this, candidateDestinationCoordinate))
+			} else if (currentCandidateOffset == 16 && this.isFirstMove() 
+					`	&& (BoardUtils.SECOND_ROW(this.piecePosition) && this.getPieceAlliance().isBlack() 
+							|| (BoardUtils.SEVENTH_ROW(this.piecePosition) && this.getPieceAlliance().isWhite())) {
+			
+				final int behindCandidateDestinationCoordinate = this.piecePosition + (this.pieceAlliance.getDirection() *8) {
+				if(!board.getTile(behindCandidateDestinationCoordinate).isTileOccupied() && 
+					!board.getTile(candidateDestinationCoordinate).isTileOccupied() &&
+						!board.getTile(candidateDestinationCoordinate).isTileOccupied()) {
+							legalMoves.add(new Move.MajorMove(board, this, candidateDestinationCoordinate));
+					}
+	
+				}
+	
+			}
+		return legalMoves;
+	}
+
+}
+
+
+
+
+
+____________________________________________________________________________________________________________________
+
+	
+public abstract class Piece {
+
+	protected final int  piecePostion;
+	protected final Alliance pieceAlliance;
+	protected final boolean isFirstMove;
+
+	Piece(final int PiecePosition, final, Alliance pieceAlliance) {
+		this.pieceAlliance = pieceAlliance;
+		this.piecePosition = piecePosition;
+		this.isFirstMove = false;
+	
+	}
+	public Alliance getPieceAlliance() {
+		return this.pieceAlliance;
+	}
+
+	public boolean isFirstMove() {
+		return this.isFirstMove;
+	}
+
+	public abstract Collection <Move> calculateLegalMoves(final Board board);	//this could have been unspecified => refactor -> change signature // List<Move> -> Collection<Move>
+}														//a set cant have duplicates + unordered
+	
+
+
+____________________________________________________________________________________________________________________
+
+BoardUtils.java
+
+public class BoardUtils {
+	public static final boolean[] FIRST_COLUMN = initColumn(0);
+	public static final boolean[] SECOND_COLUMN = initColumn(1);
+	public static final boolean[] SEVENTH_COLUMN = initColumn(6);	
+	public static final boolean[] EIGHTH_COLUMN = initColumn(7);
+
+	public static final boolean[] SECOND_ROW = null;
+	public static final boolean[] SEVENTH_ROW = null;
+
+	public static final int NUM_TILES = 64
+	public static final int NUM_TILES_PER_ROW = 64
+
+	private BoardUtils() {
+		throw new RuntimeException("You cannot instantiate me");
+	}
+
+
+	private static boolean initColumn(columnNumber) {
+		final boolean[] column = new boolean[NUM_TILES];
+
+		do {
+			column[columnNumber] = true;
+			columnNumber += NUM_TILES_PER_ROW;
+		} while(columnNumber < NUM_TILES);
+		return column; 
+
+	public static boolean isValidTileCoordinate(final int coordinate) {
+		return coordinate >=0 && coordinate < NUM_TILES;
+	}
+ 
+	}
+	
+	
+}
+____________________________________________________________________________________________________________________
+public enum Alliance {
+	WHITE{
+		@Override
+		public int getDirection() {
+			return -1;
+		}
+		@Override
+		public int isWhite() {
+			return true;
+		}
+		@Override
+		public int isBlack() {
+			return false;
+		}
+
+	},
+	BLACK{
+		@Override
+		public int getDirection() {
+			return 1;
+		}
+
+		@Override
+		public int isWhite() {
+			return false;
+		}
+		@Override
+		public int isBlack() {
+			return true;
+		}
+	}
+
+	public abstract int getDirection();
+	public abstract boolean isWhite();
+	public abstract boolean isBlack();
+}
